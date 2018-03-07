@@ -19,11 +19,8 @@ load("contributions.rda")
 
 ```{r}
 library(tidyverse)
-
 library(gridExtra)
-
 library(dplyr)
-
 ```
 
 ```{r}
@@ -32,4 +29,6 @@ load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
 ```
+
+* Maybe we should write down what each variable means somewhere and also the common variables across datasets.
 
