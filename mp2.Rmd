@@ -11,7 +11,6 @@ output: html_document
 This project is so interesting and relevant to my life!
 
 ```{r, include=FALSE}
-library(dplyr)
 load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
