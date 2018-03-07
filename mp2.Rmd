@@ -19,4 +19,5 @@ load("contributions.rda")
 
 ```{r}
 library(tidyverse)
+library(gridExtra)
 ```
