@@ -41,22 +41,7 @@ positive_candidates <- full_join(positive_contributions, candidates, by = "cand_
   left_join(house_elections, by = "cand_name")
 ```
 
-```{r}
-load("house_elections.rda")
-load("candidates.rda")
-load("committees.rda")
-load("contributions.rda")
-```
 
-
-
-
-<<<<<<< HEAD
-
-  
-
-  
-=======
 ## Committees Dataset
 tres_name: Treasurer's name
 cmte_st1: Street 1 (Address)
@@ -97,4 +82,3 @@ cand_name: Name of the candidate.
 cand_party_affiliation: Party affiliation
   + https://classic.fec.gov/finance/disclosure/metadata/DataDictionaryPartyCodeDescriptions.shtml
 cand_election_yr
->>>>>>> e446ecd8568346854c92a62122ddb94561210a71
