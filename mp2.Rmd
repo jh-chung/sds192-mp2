@@ -23,5 +23,23 @@ library(tidyverse)
 library(gridExtra)
 
 library(dplyr)
-
 ```
+
+```{r}
+negative_contributions <- contributions %>% 
+  filter(transaction_type == "24A")
+
+positive_contributions <- contributions %>% 
+  filter(transaction_type == "24E")
+
+house_elections <- house_elections %>% 
+  rename(cand_name = candidate_name)
+
+negative_candidates <- full_join(negative_contributions, candidates, by = "cand_id") %>% 
+  group_by(cand_id)
+
+positive_candidates <- full_join(positive_contributions, candidates, by = "cand_id") %>% 
+  group_by(cand_id) %>% 
+  left_join(house_elections, by = "cand_name")
+```
+
