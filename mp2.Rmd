@@ -19,10 +19,65 @@ load("contributions.rda")
 
 ```{r}
 library(tidyverse)
-
 library(gridExtra)
-
 library(dplyr)
-
 ```
 
+```{r}
+load("house_elections.rda")
+load("candidates.rda")
+load("committees.rda")
+load("contributions.rda")
+```
+
+<<<<<<< HEAD
+=======
+
+
+# **Variable Definitions**
+
+## Committees Dataset
+tres_name: Treasurer's name
+cmte_st1: Street 1 (Address)
+cmte_st2: Street 2 (Address)
+cmte_city: City or Town
+cmte_state: State
+cmte_zip: Zip Code
+cmte_dsgn: Committee Designation
+  + A = Authorized by a candidate
+  + B = Lobbyist/Registrant PAC
+  + D = Leadership PAC
+  + J = Joint fundraiser
+  + P = Principal campaign committee of a candidate
+  + U = Unauthorized
+cmte_type: Committee type
+  + https://classic.fec.gov/finance/disclosure/metadata/CommitteeTypeCodes.shtml
+cmte_party_affiliation: Party
+  + https://classic.fec.gov/finance/disclosure/metadata/DataDictionaryPartyCodeDescriptions.shtml
+cmte_filing_freq: Filing frequency
+  + A = Administratively terminated
+  + D = Debt
+  + M = Monthly filer
+  + Q = Quarterly filer
+  + T = Terminated
+  + W = Waived
+org_type: Interest category group (seems important)
+  + C = Corporation
+  + L = Labor organization
+  + M = Membership organization
+  + T = Trade association
+  + V = Cooperative
+  + W = Corporation without capital stock
+  
+## Candidates Dataset
+cand_id: Candidate identification.
+  + A 9-character alpha-numeric code assigned to a candidate by the Federal Election Commission. The candidate ID for a specific candidate remains the same across election cycles as long as the candidate is running for the same office.
+cand_name: Name of the candidate.
+cand_party_affiliation: Party affiliation
+  + https://classic.fec.gov/finance/disclosure/metadata/DataDictionaryPartyCodeDescriptions.shtml
+cand_election_yr
+
+  
+
+  
+>>>>>>> 881508db5ce71f43f9bb389c336c5fc0239f1c9a
