@@ -30,5 +30,45 @@ load("committees.rda")
 load("contributions.rda")
 ```
 
-* Maybe we should write down what each variable means somewhere and also the common variables across datasets.
 
+
+# **Variable Definitions**
+
+## Candidates Dataset
+*
+*
+*
+
+## Committees Dataset
+tres_name: Treasurer's name
+cmte_st1: Street 1 (Address)
+cmte_st2: Street 2 (Address)
+cmte_city: City or Town
+cmte_state: State
+cmte_zip: Zip Code
+cmte_dsgn: Committee Designation
+  + A = Authorized by a candidate
+  + B = Lobbyist/Registrant PAC
+  + D = Leadership PAC
+  + J = Joint fundraiser
+  + P = Principal campaign committee of a candidate
+  + U = Unauthorized
+cmte_type: Committee type
+  + https://classic.fec.gov/finance/disclosure/metadata/CommitteeTypeCodes.shtml
+cmte_party_affiliation: Party
+  + https://classic.fec.gov/finance/disclosure/metadata/DataDictionaryPartyCodeDescriptions.shtml
+cmte_filing_freq: Filing frequency
+  + A = Administratively terminated
+  + D = Debt
+  + M = Monthly filer
+  + Q = Quarterly filer
+  + T = Terminated
+  + W = Waived
+org_type: Interest category group (seems important)
+  + C = Corporation
+  + L = Labor organization
+  + M = Membership organization
+  + T = Trade association
+  + V = Cooperative
+  + W = Corporation without capital stock
+  
