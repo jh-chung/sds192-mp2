@@ -33,14 +33,23 @@ positive_contributions <- contributions %>%
   filter(transaction_type == "24E")
 
 house_elections <- house_elections %>% 
-  rename(cand_name = candidate_name)
+  rename(cand_id = fec_id)
 
-negative_candidates <- full_join(negative_contributions, candidates, by = "cand_id") %>% 
-  group_by(cand_id)
+negative_candidates <- inner_join(negative_contributions, candidates, by = "cand_id") %>% 
+  right_join(house_elections, by = "cand_id") %>% 
+  filter(!is.na(transaction_type)) %>% 
+  group_by(cand_name.y, cand_party_affiliation, primary_votes,
+           runoff_votes, general_votes, ge_winner) %>% 
+  summarize(total_dollars = sum(transaction_amt)) %>% 
+  arrange(desc(total_dollars))
 
-positive_candidates <- full_join(positive_contributions, candidates, by = "cand_id") %>% 
-  group_by(cand_id) %>% 
-  left_join(house_elections, by = "cand_name")
+positive_candidates <- inner_join(positive_contributions, candidates, by = "cand_id") %>% 
+  right_join(house_elections, by = "cand_id") %>% 
+  filter(!is.na(transaction_type)) %>% 
+  group_by(cand_name.y, cand_party_affiliation, primary_votes,
+           runoff_votes, general_votes, ge_winner) %>%
+  summarize(total_dollars = sum(transaction_amt)) %>% 
+  arrange(desc(total_dollars))
 ```
 
 
