@@ -21,6 +21,7 @@ load("contributions.rda")
 library(tidyverse)
 library(gridExtra)
 library(dplyr)
+library(ggplot2)
 ```
 
 ```{r}
@@ -38,20 +39,32 @@ h_elections <- house_elections %>%
 
 # Finding candidates that were funded against
 negative_candidates <- inner_join(negative_contributions, candidates, by = "cand_id") %>% 
+
   right_join(h_elections , by = "cand_id") %>% # Linking the candidates to their names, not just id number
   filter(!is.na(transaction_type)) %>% # Do not want NA transactions
-  group_by(candidate_name, cand_party_affiliation, primary_votes,
-           runoff_votes, general_votes, ge_winner) %>%
-  summarize(total_dollars = sum(transaction_amt)) %>%
+  filter(!is.na(transaction_type)) %>% 
+  group_by(cand_name, cand_party_affiliation, primary_votes,
+           runoff_votes, general_votes, ge_winner) %>% 
+  summarize(total_dollars = sum(transaction_amt)) %>% 
   arrange(desc(total_dollars))
+  #filter(total_dollars > 100000)
 
 positive_candidates <- inner_join(positive_contributions, candidates, by = "cand_id") %>% 
   right_join(h_elections, by = "cand_id") %>% 
   filter(!is.na(transaction_type)) %>% 
-  group_by(candidate_name, cand_party_affiliation, primary_votes,
-           runoff_votes, general_votes, ge_winner) %>%
+  group_by(cand_name, cand_party_affiliation, primary_votes,
+  runoff_votes, general_votes, ge_winner) %>%
   summarize(total_dollars = sum(transaction_amt)) %>% 
-  arrange(desc(total_dollars))
+  arrange(desc(total_dollars)) 
+  #filter(total_dollars > 100000)
+
+ggplot(positive_candidates, aes(x = general_votes,
+                                y = total_dollars)) +
+  geom_point(aes(col = ge_winner))
+
+ggplot(negative_candidates, aes(x = general_votes,
+                                y = total_dollars)) +
+  geom_point(aes(col = ge_winner))
 ```
 
 
