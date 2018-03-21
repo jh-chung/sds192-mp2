@@ -110,7 +110,9 @@ hcand_dollars <- hcand_contributions %>%
   filter(!is.na(cand_party_affiliation)) %>% 
   filter(!is.na(transaction_amt)) %>% 
   group_by(cand_party_affiliation) %>% 
-  summarize(total_donations = sum(transaction_amt)) %>% 
+  summarize(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(candidate_name),
+            per_cand = total_donations / num_cand) %>% 
   #filtered by certain parties but still 
   #doesn't look great on graph
   filter(cand_party_affiliation %in% c("DFL", "DEM", 
@@ -132,9 +134,11 @@ hcand_wins <- hcand_contributions %>%
 
 hcand_wins1 <- hcand_wins %>% 
   #similarly filtered by only certain parties
-  filter(cand_party_affiliation %in% c("DFL", "DEM", "REP",
-                                       "UNK", "IND"))
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP", "IND"))
 ```
+
+These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections.
 
 ```{r}
 library(ggplot2)
@@ -144,24 +148,32 @@ library(gridExtra)
 # as well as total donations received--not sure what we want to
 # do here as only democrats and republicans receive much money
 percent_plot <- ggplot(hcand_wins1, aes(x = cand_party_affiliation, y = prop)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
   labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
   theme_economist() + 
-  theme(plot.title = element_text(size = 12))
+  theme(plot.title = element_text(size = 12),
+        legend.position = "none") +
+  geom_text(aes(label = total),
+            position = position_dodge(width = 0.9),
+            vjust = -0.25,
+            size = 3)
 
-percent_plot
-  
 
 money_plot <- ggplot(hcand_dollars, 
                      aes(x = cand_party_affiliation, 
-                         y = total_donations)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Total Donations by Political Party", 
+                         y = per_cand)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Donations per Candidate",
+       subtitle = "Separated by Party",
        x = "Party", y = "Total Dollars Donated") +
   theme_economist() +
-  theme(plot.title = element_text(size = 12))
-
-money_plot
+  theme(plot.title = element_text(size = 12),
+        legend.position = "none")
+  # geom_text(aes(label=per_cand),
+  #           position=position_dodge(width=0.9),
+  #           vjust=-0.25,
+  #           size = 2)
+  
 
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
