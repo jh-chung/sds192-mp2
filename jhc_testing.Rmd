@@ -80,14 +80,14 @@ hcand_contributions <- cand_contributions %>%
 # Temporary tool to help
 names(hcand_contributions)
 
-# NEgative contributions
+# Negative contributions
 n_cobn <- hcand_contributions %>%
   # I do not think that the address is particularly useful, cand_office_state and affiliation are useful. 
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner , general_votes) %>%
-  filter(transaction_type == "24A" , entity_type == "ORG" , cand_office_state == "US")
+  filter(transaction_type == "24A" , entity_type == "ORG")
 
 # Positive contributions
-p_cobn <- cand_contributions %>%
+p_cobn <- hcand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type, ge_winner , general_votes) %>%
   filter(transaction_type == "24E" , entity_type == "ORG")
 
@@ -98,12 +98,14 @@ house_elections %>%
   nrow()
 
 # Sorting out the Democratic wins
-dem_ws <- hcand_contributions %>%
+n_dem_ws <- n_cobn %>%
    select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type, ge_winner , general_votes) %>%
-filter(cand_party_affiliation == "DEM")
+  filter(cand_party_affiliation == "DEM" , !is.na(ge_winner) , transaction_pgi == "G") %>%
+  group_by(cand_id , cand_name , cand_office_state , transaction_amt , transaction_type , entity_type) %>%
+  summarize(n = n() )
 
 
-plotdem_ws <- ggplot(dem_ws) +
+plotdem_ws <- ggplot(n_dem_ws , aes(x = ge_winner, y = general_votes)) +
   geom_bar()
 ```
 
