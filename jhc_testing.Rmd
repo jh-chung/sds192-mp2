@@ -148,8 +148,9 @@ t_wins <- ggplot(hcand_wins1, aes(x = cand_party_affiliation, y = prop)) +
 
 t_dollars <- ggplot(hcand_dollars, aes(x = cand_party_affiliation, 
                           y = total_donations)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity" ) +
   theme_economist() +
+  ggtitle("Total Donations for Parties") +
   labs(x = "Party Affiliation" , y = "Total Donations")
 
 t_wins
