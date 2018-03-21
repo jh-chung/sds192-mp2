@@ -102,11 +102,18 @@ n_dem_ws <- n_cobn %>%
    select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type, ge_winner , general_votes) %>%
   filter(cand_party_affiliation == "DEM" , !is.na(ge_winner) , transaction_pgi == "G") %>%
   group_by(cand_id , cand_name , cand_office_state , transaction_amt , transaction_type , entity_type) %>%
-  summarize(n = n() )
+  summarize(n = n() , n_cand = n_distinct(cand_id)) %>%
+  mutate(n_winners = n_distinct(cand_id))
 
 
-plotdem_ws <- ggplot(n_dem_ws , aes(x = ge_winner, y = general_votes)) +
+plotdem_ws <- ggplot(n_dem_ws , aes(x = , y = general_votes)) +
   geom_bar()
+
+hcand_contributions %>%
+  group_by(cand_id ) %>%
+  summarize(N = n() , total_votes = sum(general_votes) , 
+            dem_v = sum(ifelse(party == "Dem" , general_votes , 0)) ,
+            rep_v = sum(ifelse(party = "Rep" , general_votes , 0)))
 ```
 
 
