@@ -76,11 +76,11 @@ hcand_contributions <- cand_contributions %>%
   full_join(h_elections , by = "cand_id")
 
 
-n_cobn <- cand_contributions %>%
+n_cobn <- hcand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
-  filter(transaction_type == "24A" , entity_type == "ORG" , transaction_pgi == "G" , cand_office_state == "US")
+  filter(transaction_type == "24A" , cand_office_state == "US")
 
-p_cobn <- cand_contributions %>%
+p_cobn <- hcand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
   filter(transaction_type == "24E" , entity_type == "ORG")
 
@@ -147,7 +147,7 @@ percent_plot <- ggplot(hcand_wins1, aes(x = cand_party_affiliation, y = prop)) +
   geom_bar(stat = "identity") +
   labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
   theme_economist() + 
-  theme(plot.title = element_text(size = 8))
+  theme(plot.title = element_text(size = 12))
 
 percent_plot
   
@@ -159,10 +159,23 @@ money_plot <- ggplot(hcand_dollars,
   labs(title = "Total Donations by Political Party", 
        x = "Party", y = "Total Dollars Donated") +
   theme_economist() +
-  theme(plot.title = element_text(size = 8))
+  theme(plot.title = element_text(size = 12))
 
 money_plot
 
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
+
+```{r}
+n_money <- ggplot(n_cobn1 , aes(x = cand_party_affiliation , y = total_amt)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Negative Contributions Spent Against Each Party" , 
+       x = "Party" , y = "Negative Contributions") +
+  theme_economist() +
+  theme(plot.title = element_text(size = 12))
+
+n_money
+```
+
+# Note that h_candcontributions has a cand_year. 
 
