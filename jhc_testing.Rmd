@@ -5,7 +5,7 @@ date: "3/19/2018"
 output: html_document
 ---
 
-```{r, include=FALSE}
+```{r, include = FALSE , message = FALSE , warning = FALSE}
 load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
@@ -16,7 +16,6 @@ load("contributions.rda")
 library(tidyverse)
 library(gridExtra)
 library(dplyr)
-library(ggplot2)
 ```
 
 ```{r}
@@ -64,30 +63,40 @@ ggplot(negative_candidates, aes(x = general_votes,
 So a few things. First, connect with the contributions and candidates.
 
 ```{r}
+
+# So first joining candidates and contributions. 
 cand_contributions <- contributions %>%
   full_join(candidates , by = "cand_id") %>%
   group_by(cand_id , cand_name , cand_office_state , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type)
 
+# Renaming the fec id as cand_id to prepare joining. We want the ge_winner from the House elections to understand who won and who lost.
 h_elections <- house_elections %>% 
   rename(cand_id = fec_id)
 
+# Joining house elections together with candidates+contributions to have the cand_id , name , types of transactions, and outcome of election
 hcand_contributions <- cand_contributions %>%
   full_join(h_elections , by = "cand_id")
 
+# Temporary tool to help
+names(hcand_contributions)
 
-n_cobn <- cand_contributions %>%
-  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
-  filter(transaction_type == "24A" , entity_type == "ORG" , transaction_pgi == "G" , cand_office_state == "US")
+# NEgative contributions
+n_cobn <- hcand_contributions %>%
+  # I do not think that the address is particularly useful, cand_office_state and affiliation are useful. 
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner , general_votes) %>%
+  filter(transaction_type == "24A" , entity_type == "ORG" , cand_office_state == "US")
 
-sp_cobn <- cand_contributions %>%
-  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
+# Positive contributions
+p_cobn <- cand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type, ge_winner , general_votes) %>%
   filter(transaction_type == "24E" , entity_type == "ORG")
 
-# This is just to find how many elections there were in total: 445. Phew.
+# This is just to find how many elections there were in total: 445. Phew. Not relevant, really.
 house_elections %>%
   group_by(state , district) %>%
-  summarize( N = n()) %>%
+  summarize( N = n() ) %>%
   nrow()
 
+ggplot()
 ```
 
