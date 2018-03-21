@@ -1,0 +1,93 @@
+---
+title: "jhc_testing"
+author: "Jay-Ho Chung"
+date: "3/19/2018"
+output: html_document
+---
+
+```{r, include=FALSE}
+load("house_elections.rda")
+load("candidates.rda")
+load("committees.rda")
+load("contributions.rda")
+```
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+# Filtering out contributions that were against a candidate
+negative_contributions <- contributions %>% 
+  filter(transaction_type == "24A")
+
+# Filtering out contributions that were for a candidate
+positive_contributions <- contributions %>% 
+  filter(transaction_type == "24E")
+
+# Renaming a fec_id to cand_id for joining
+h_elections <- house_elections %>% 
+  rename(cand_id = fec_id)
+
+# Finding candidates that were funded against
+negative_candidates <- inner_join(negative_contributions, candidates, by = "cand_id") %>% 
+
+  right_join(h_elections , by = "cand_id") %>% # Linking the candidates to their names, not just id number
+  filter(!is.na(transaction_type)) %>% # Do not want NA transactions
+  filter(!is.na(transaction_type)) %>% 
+  group_by(cand_name, cand_party_affiliation, primary_votes,
+           runoff_votes, general_votes, ge_winner) %>% 
+  summarize(total_dollars = sum(transaction_amt)) %>% 
+  arrange(desc(total_dollars))
+
+positive_candidates <- inner_join(positive_contributions, candidates, by = "cand_id") %>% 
+  right_join(h_elections, by = "cand_id") %>% 
+  filter(!is.na(transaction_type)) %>% 
+  group_by(cand_name, cand_party_affiliation, primary_votes,
+  runoff_votes, general_votes, ge_winner) %>%
+  summarize(total_dollars = sum(transaction_amt)) %>% 
+  arrange(desc(total_dollars)) 
+
+
+ggplot(positive_candidates, aes(x = general_votes,
+                                y = total_dollars)) +
+  geom_point(aes(col = ge_winner))
+
+ggplot(negative_candidates, aes(x = general_votes,
+                                y = total_dollars)) +
+  geom_point(aes(col = ge_winner))
+```
+
+So a few things. First, connect with the contributions and candidates.
+
+```{r}
+cand_contributions <- contributions %>%
+  full_join(candidates , by = "cand_id") %>%
+  group_by(cand_id , cand_name , cand_office_state , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type)
+
+h_elections <- house_elections %>% 
+  rename(cand_id = fec_id)
+
+hcand_contributions <- cand_contributions %>%
+  full_join(h_elections , by = "cand_id")
+
+
+n_cobn <- cand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
+  filter(transaction_type == "24A" , entity_type == "ORG" , transaction_pgi == "G" , cand_office_state == "US")
+
+sp_cobn <- cand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
+  filter(transaction_type == "24E" , entity_type == "ORG")
+
+# This is just to find how many elections there were in total: 445. Phew.
+house_elections %>%
+  group_by(state , district) %>%
+  summarize( N = n()) %>%
+  nrow()
+
+```
+
