@@ -17,6 +17,7 @@ library(tidyverse)
 library(gridExtra)
 library(dplyr)
 library(ggplot2)
+library(ggthemes)
 ```
 
 ```{r}
@@ -79,7 +80,7 @@ n_cobn <- cand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
   filter(transaction_type == "24A" , entity_type == "ORG" , transaction_pgi == "G" , cand_office_state == "US")
 
-sp_cobn <- cand_contributions %>%
+p_cobn <- cand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
   filter(transaction_type == "24E" , entity_type == "ORG")
 
@@ -97,7 +98,7 @@ n_cobn1 <- n_cobn %>%
   group_by(cand_name) %>% 
   summarize(total_amt = sum(transaction_amt))
 
-sp_cobn1 <- sp_cobn %>% 
+p_cobn1 <- p_cobn %>% 
   group_by(cand_name) %>% 
   summarize(total_amt = sum(transaction_amt)) %>% 
   arrange(desc(total_amt))
@@ -139,11 +140,19 @@ hcand_wins1 <- hcand_wins %>%
 # basic plots showing success of parties in elections,
 # as well as total donations received--not sure what we want to
 # do here as only democrats and republicans receive much money
-ggplot(hcand_wins1, aes(x = cand_party_affiliation, y = prop)) +
-  geom_bar(stat = "identity")
+t_wins <- ggplot(hcand_wins1, aes(x = cand_party_affiliation, y = prop)) +
+  geom_bar(stat = "identity") +
+  theme_economist() +
+  ggtitle("Proportions of Wins for Each Party") +
+  labs(x = "Party Affiliation" , y = "Proportion")
 
-ggplot(hcand_dollars, aes(x = cand_party_affiliation, 
+t_dollars <- ggplot(hcand_dollars, aes(x = cand_party_affiliation, 
                           y = total_donations)) +
-  geom_bar(stat = "identity")
+  geom_bar(stat = "identity") +
+  theme_economist() +
+  labs(x = "Party Affiliation" , y = "Total Donations")
+
+t_wins
+t_dollars
 ```
 
