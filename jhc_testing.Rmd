@@ -97,6 +97,17 @@ house_elections %>%
   summarize( N = n() ) %>%
   nrow()
 
-ggplot()
+# Sorting out the Democratic wins
+dem_ws <- hcand_contributions %>%
+   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type, ge_winner , general_votes) %>%
+filter(cand_party_affiliation == "DEM")
+
+
+plotdem_ws <- ggplot(dem_ws) +
+  geom_bar()
 ```
+
+
+plot_dem_ws
+
 
