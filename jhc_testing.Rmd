@@ -5,7 +5,7 @@ date: "3/19/2018"
 output: html_document
 ---
 
-```{r, include = FALSE , message = FALSE , warning = FALSE}
+```{r, include=FALSE}
 load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
@@ -16,6 +16,7 @@ load("contributions.rda")
 library(tidyverse)
 library(gridExtra)
 library(dplyr)
+library(ggplot2)
 ```
 
 ```{r}
@@ -63,53 +64,83 @@ ggplot(negative_candidates, aes(x = general_votes,
 So a few things. First, connect with the contributions and candidates.
 
 ```{r}
-
-# So first joining candidates and contributions. 
 cand_contributions <- contributions %>%
   full_join(candidates , by = "cand_id") %>%
   group_by(cand_id , cand_name , cand_office_state , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type)
 
-# Renaming the fec id as cand_id to prepare joining. We want the ge_winner from the House elections to understand who won and who lost.
 h_elections <- house_elections %>% 
   rename(cand_id = fec_id)
 
-# Joining house elections together with candidates+contributions to have the cand_id , name , types of transactions, and outcome of election
 hcand_contributions <- cand_contributions %>%
   full_join(h_elections , by = "cand_id")
 
-# Temporary tool to help
-names(hcand_contributions)
 
-# Negative contributions
-n_cobn <- hcand_contributions %>%
-  # I do not think that the address is particularly useful, cand_office_state and affiliation are useful. 
-  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner , general_votes) %>%
-  filter(transaction_type == "24A" , entity_type == "ORG")
+n_cobn <- cand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
+  filter(transaction_type == "24A" , entity_type == "ORG" , transaction_pgi == "G" , cand_office_state == "US")
 
-# Positive contributions
-p_cobn <- hcand_contributions %>%
-  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type, ge_winner , general_votes) %>%
+sp_cobn <- cand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
   filter(transaction_type == "24E" , entity_type == "ORG")
 
-# This is just to find how many elections there were in total: 445. Phew. Not relevant, really.
+# This is just to find how many elections there were in total: 445. Phew.
 house_elections %>%
   group_by(state , district) %>%
-  summarize( N = n() ) %>%
+  summarize( N = n()) %>%
   nrow()
-
-# Sorting out the Democratic wins
-n_dem_ws <- n_cobn %>%
-   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type, ge_winner , general_votes) %>%
-  filter(cand_party_affiliation == "DEM" , !is.na(ge_winner) , transaction_pgi == "G") %>%
-  group_by(cand_id , cand_name , cand_office_state , transaction_amt , transaction_type , entity_type) %>%
-  summarize(n = n() )
-
-
-plotdem_ws <- ggplot(n_dem_ws , aes(x = ge_winner, y = general_votes)) +
-  geom_bar()
 ```
 
+```{r}
+n_cobn1 <- n_cobn %>% 
+  group_by(cand_name) %>% 
+  summarize(total_amt = sum(transaction_amt))
 
-plot_dem_ws
+sp_cobn1 <- sp_cobn %>% 
+  group_by(cand_name) %>% 
+  summarize(total_amt = sum(transaction_amt)) %>% 
+  arrange(desc(total_amt))
+```
 
+```{r}
+hcand_dollars <- hcand_contributions %>% 
+  filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  summarize(total_donations = sum(transaction_amt)) %>% 
+  #filtered by certain parties but still 
+  #doesn't look great on graph
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND"))
+```
+
+```{r}
+hcand_wins <- hcand_contributions %>% 
+  filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
+  ungroup() %>% 
+  select(cand_party_affiliation, candidate_name,
+         ge_winner) %>% 
+  group_by(candidate_name) %>% 
+  unique() %>% 
+  group_by(cand_party_affiliation) %>% 
+  summarize(total = n_distinct(candidate_name), 
+            wins = sum(ifelse(ge_winner == "W", 1, 0)),
+            prop = wins/total)
+
+hcand_wins1 <- hcand_wins %>% 
+  #similarly filtered by only certain parties
+  filter(cand_party_affiliation %in% c("DFL", "DEM", "REP",
+                                       "UNK", "IND"))
+```
+
+```{r}
+# basic plots showing success of parties in elections,
+# as well as total donations received--not sure what we want to
+# do here as only democrats and republicans receive much money
+ggplot(hcand_wins1, aes(x = cand_party_affiliation, y = prop)) +
+  geom_bar(stat = "identity")
+
+ggplot(hcand_dollars, aes(x = cand_party_affiliation, 
+                          y = total_donations)) +
+  geom_bar(stat = "identity")
+```
 
