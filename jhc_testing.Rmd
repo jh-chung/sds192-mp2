@@ -90,6 +90,8 @@ house_elections %>%
   nrow()
 ```
 
+
+
 ```{r}
 n_cobn1 <- n_cobn %>% 
   group_by(cand_name) %>% 
@@ -99,6 +101,7 @@ sp_cobn1 <- sp_cobn %>%
   group_by(cand_name) %>% 
   summarize(total_amt = sum(transaction_amt)) %>% 
   arrange(desc(total_amt))
+
 ```
 
 ```{r}
