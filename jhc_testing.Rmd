@@ -300,8 +300,7 @@ neg_cand_dollars <- hcand_dollars %>%
 
 ```{r}
 pos_contributions_plot <- ggplot(pos_cand_dollars, 
-                     aes(x = cand_party_affiliation, 
-                         y = per_cand)) +
+                                  aes(x = cand_party_affiliation, y = per_cand)) +
   geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
   labs(title = "Positive Contributions per Candidate",
        x = "Party", y = "Total Positive Dollars Donated") +
@@ -311,11 +310,10 @@ pos_contributions_plot <- ggplot(pos_cand_dollars,
 pos_contributions_plot
 
 neg_contributions_plot <- ggplot(neg_cand_dollars, 
-                     aes(x = cand_party_affiliation, 
-                         y = per_cand)) +
+                                 aes(x = cand_party_affiliation, y = per_cand)) +
   geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
   labs(title = "Negative Contributions per Candidate",
-       x = "Party", y = "Total Positive Dollars Donated") +
+       x = "Party", y = "Total Negative Dollars Donated") +
   theme_economist() +
   theme(plot.title = element_text(size = 12),
         legend.position = "none")
