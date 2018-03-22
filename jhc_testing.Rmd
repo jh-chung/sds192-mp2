@@ -177,73 +177,7 @@ money_plot <- ggplot(hcand_dollars,
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
 
-```{r not working}
-n_money <- ggplot(n_cobn1 , aes(x = cand_party_affiliation , y = total_amt)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Negative Contributions Spent Against Each Party" , 
-       x = "Party" , y = "Negative Contributions") +
-  theme_economist() +
-  theme(plot.title = element_text(size = 12))
 
-n_money
-```
-
-```{r Time Series test}
-# Time series of how the proportion of positive:negative contributions has changed and how this, perhaps, has changed the wins
-# Note that h_candcontributions has a cand_election_yr, which is discerte in this case.
-# Iterate over each state?
-cobn2 <- hcand_contributions %>%
-  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
-  na.omit(ge_winner) %>%
-  na.omit(cand_election_yr) %>% 
-  group_by(cand_party_affiliation , transaction_type , transaction_amt , cand_election_yr) 
-
-## %>%
-  ##filter(transaction_type == "24A" || transaction_type == "24E") %>%
-  ##summarize(t_t = sum(transaction_amt)) 
-# So far, I have made t_t to find the total transaction for 24A and 24E.
-
-  #mutate(n_c = t_t / sum(t_t)) %>%
-  #filter(transaction_type == "24A")
-
-d_cobn <- cobn2 %>%
-  filter(cand_party_affiliation == "DEM")
-# Here, checking the Dems contributions. Gives us total spent against Dems, resulting in Ws, and total spent against 
-
-
-ggplot(d_cobn , aes(x = cand_election_yr , y = transaction_amt)) +
-  geom_point()
-
-# Just graph it first. group_by(year , transaction_amt) graph it. Separate and specify in 
-p_cobn2 <- hcand_contributions %>%
-  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
-  filter(transaction_type == "24E" , !is.na(ge_winner) , !is.na(cand_election_yr)) %>%
-  group_by(cand_id , cand_election_yr , transaction_type , cand_party_affiliation) %>%
-  summarize(p_c = sum(transaction_amt))
-
-
-
-rn_cobn <- n_cobn2 %>%
-  full_join(p_cobn , by = "cand_id") %>%
-  filter(cand_party_affiliation == "REP") %>%
-  mutate(p_n = p_c / n_c)
-
-
-n_cobn2 <- hcand_contributions %>%
-    filter(transaction_type == "24A" || transaction_type == "24E") %>%
-    na.omit(ge_winner) %>%
-    na.omit(cand_election_yr) %>% 
-    group_by(cand_election_yr , ge_winner , cand_party_affiliation) %>%
-    summarize(t_t = sum(transaction_amt))
-
-
-
-  
-n_p_plot <- ggplot(n_cobn2 , aes(x = cand_election_yr , y = ge_winner)) +
-  geom_bar(aes(x = cand_election_yr))
-
-n_p_plot
-```
 
 
 ```{r}
@@ -308,4 +242,78 @@ neg_contributions_plot <- ggplot(neg_cand_dollars,
         legend.position = "none")
 neg_contributions_plot
 ```
+
+
+
+
+
+
+
+
+```{r not working}
+n_money <- ggplot(n_cobn1 , aes(x = cand_party_affiliation , y = total_amt)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Negative Contributions Spent Against Each Party" , 
+       x = "Party" , y = "Negative Contributions") +
+  theme_economist() +
+  theme(plot.title = element_text(size = 12))
+
+n_money
+```
+
+```{r Time Series test}
+# Time series of how the proportion of positive:negative contributions has changed and how this, perhaps, has changed the wins
+# Note that h_candcontributions has a cand_election_yr, which is discerte in this case.
+# Iterate over each state?
+cobn2 <- hcand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
+  na.omit(ge_winner) %>%
+  na.omit(cand_election_yr) %>% 
+  filter(transaction_type == "24A" || transaction_type == "24E")
+# So far, I have made t_t to find the total transaction for 24A and 24E.
+#  group_by(cand_id , cand_election_yr , cand_party_affiliation , transaction_type) %>%
+#  summarize(t_t = sum(transaction_amt)) 
+
+  #mutate(n_c = t_t / sum(t_t)) %>%
+  #filter(transaction_type == "24A")
+
+d_cobn <- cobn2 %>%
+  filter(cand_party_affiliation == "DEM")
+# Here, checking the Dems contributions. Gives us total spent against Dems, resulting in Ws, and total spent against 
+
+
+ggplot(d_cobn , aes(x = cand_election_yr , y = transaction_amt)) +
+  geom_point()
+
+# Just graph it first. group_by(year , transaction_amt) graph it. Separate and specify in 
+p_cobn2 <- hcand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
+  filter(transaction_type == "24E" , !is.na(ge_winner) , !is.na(cand_election_yr)) %>%
+  group_by(cand_id , cand_election_yr , transaction_type , cand_party_affiliation) %>%
+  summarize(p_c = sum(transaction_amt))
+
+
+
+rn_cobn <- n_cobn2 %>%
+  full_join(p_cobn , by = "cand_id") %>%
+  filter(cand_party_affiliation == "REP") %>%
+  mutate(p_n = p_c / n_c)
+
+
+n_cobn2 <- hcand_contributions %>%
+    filter(transaction_type == "24A" || transaction_type == "24E") %>%
+    na.omit(ge_winner) %>%
+    na.omit(cand_election_yr) %>% 
+    group_by(cand_election_yr , ge_winner , cand_party_affiliation) %>%
+    summarize(t_t = sum(transaction_amt))
+
+
+
+  
+n_p_plot <- ggplot(n_cobn2 , aes(x = cand_election_yr , y = ge_winner)) +
+  geom_bar(aes(x = cand_election_yr))
+
+n_p_plot
+```
+
 
