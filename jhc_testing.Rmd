@@ -198,18 +198,23 @@ cobn2 <- hcand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
   na.omit(ge_winner) %>%
   na.omit(cand_election_yr) %>% 
-  group_by(cand_id , transaction_type , transaction_amt) %>%
-  filter(transaction_type == "24A" || transaction_type == "24E") %>%
-  summarize(t_t = sum(transaction_amt)) 
+  group_by(cand_party_affiliation , transaction_type , transaction_amt , cand_election_yr) 
+
+## %>%
+  ##filter(transaction_type == "24A" || transaction_type == "24E") %>%
+  ##summarize(t_t = sum(transaction_amt)) 
 # So far, I have made t_t to find the total transaction for 24A and 24E.
 
   #mutate(n_c = t_t / sum(t_t)) %>%
   #filter(transaction_type == "24A")
 
-d_cobn <- n_cobn2 %>%
+d_cobn <- cobn2 %>%
   filter(cand_party_affiliation == "DEM")
-# Here, checking the Dems contributions. Gives us total spent against Dems, resulting in Ws, and total sepent against 
+# Here, checking the Dems contributions. Gives us total spent against Dems, resulting in Ws, and total spent against 
 
+
+ggplot(d_cobn , aes(x = cand_election_yr , y = transaction_amt)) +
+  geom_point()
 
 # Just graph it first. group_by(year , transaction_amt) graph it. Separate and specify in 
 p_cobn2 <- hcand_contributions %>%
