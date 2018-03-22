@@ -179,7 +179,7 @@ money_plot <- ggplot(hcand_dollars,
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
 
-```{r}
+```{r not working}
 n_money <- ggplot(n_cobn1 , aes(x = cand_party_affiliation , y = total_amt)) +
   geom_bar(stat = "identity") +
   labs(title = "Negative Contributions Spent Against Each Party" , 
@@ -190,20 +190,25 @@ n_money <- ggplot(n_cobn1 , aes(x = cand_party_affiliation , y = total_amt)) +
 n_money
 ```
 
-```{r}
+```{r Time Series test}
 # Time series of how the proportion of positive:negative contributions has changed and how this, perhaps, has changed the wins
 # Note that h_candcontributions has a cand_election_yr, which is discerte in this case.
 # Iterate over each state?
-n_cobn2 <- hcand_contributions %>%
+cobn2 <- hcand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
   na.omit(ge_winner) %>%
   na.omit(cand_election_yr) %>% 
-  group_by(cand_id , transaction_type) %>%
+  group_by(cand_id , transaction_type , transaction_amt) %>%
   filter(transaction_type == "24A" || transaction_type == "24E") %>%
-  summarize(t_t = sum(transaction_amt))
+  summarize(t_t = sum(transaction_amt)) 
+# So far, I have made t_t to find the total transaction for 24A and 24E.
 
-  mutate(n_c = t_t / sum(t_t)) %>%
-  filter(transaction_type == "24A")
+  #mutate(n_c = t_t / sum(t_t)) %>%
+  #filter(transaction_type == "24A")
+
+d_cobn <- n_cobn2 %>%
+  filter(cand_party_affiliation == "DEM")
+# Here, checking the Dems contributions. Gives us total spent against Dems, resulting in Ws, and total sepent against 
 
 
 # Just graph it first. group_by(year , transaction_amt) graph it. Separate and specify in 
@@ -213,8 +218,7 @@ p_cobn2 <- hcand_contributions %>%
   group_by(cand_id , cand_election_yr , transaction_type , cand_party_affiliation) %>%
   summarize(p_c = sum(transaction_amt))
 
-dn_cobn <- n_cobn2 %>%
-  filter(cand_party_affiliation == "DEM")
+
 
 rn_cobn <- n_cobn2 %>%
   full_join(p_cobn , by = "cand_id") %>%
