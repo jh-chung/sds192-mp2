@@ -220,7 +220,7 @@ grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 2)
 
 ```
 
-``{r Time Series test}
+```{r Time Series test}
 # Time series of how the proportion of positive:negative contributions has changed and how this, perhaps, has changed the wins
 # Note that h_candcontributions has a cand_election_yr, which is discerte in this case.
 # Iterate over each state?
@@ -277,37 +277,4 @@ n_p_plot <- ggplot(n_cobn2 , aes(x = cand_election_yr , y = ge_winner)) +
 n_p_plot
 ```
 
-
-```{r}
-hcand_dollars <- hcand_contributions %>% 
-  filter(!is.na(cand_party_affiliation)) %>% 
-  filter(!is.na(transaction_amt)) %>% 
-  group_by(cand_party_affiliation) %>% 
-  summarize(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(cand_name),
-            per_cand = total_donations / num_cand) %>% 
-  #filtered by certain parties but still  
-  #doesn't look great on graph
-  filter(cand_party_affiliation %in% c("DFL", "DEM", 
-                                       "REP","IND"))
-```
-
-```{r}
-hcand_wins <- hcand_contributions %>% 
-  filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
-  ungroup() %>% 
-  select(cand_party_affiliation, cand_name,
-         ge_winner) %>% 
-  group_by(cand_name) %>% 
-  unique() %>% 
-  group_by(cand_party_affiliation) %>% 
-  summarize(total = n_distinct(cand_name), 
-            wins = sum(ifelse(ge_winner == "W", 1, 0)),
-            prop = wins/total)
-
-hcand_wins1 <- hcand_wins %>% 
-  #similarly filtered by only certain parties
-  filter(cand_party_affiliation %in% c("DFL", "DEM", 
-                                       "REP", "IND"))
-```
 
