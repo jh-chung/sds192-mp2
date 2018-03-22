@@ -276,26 +276,10 @@ hcand_wins1 <- hcand_wins %>%
 
 ```{r}
 pos_cand_dollars <- hcand_dollars %>% 
-  filter(transaction_type == "24E") %>%
-  filter(!is.na(cand_party_affiliation)) %>% 
-  filter(!is.na(transaction_amt)) %>% 
-  group_by(cand_party_affiliation) %>% 
-  mutate(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(candidate_name),
-            per_cand = total_donations / num_cand) %>%
-  filter(cand_party_affiliation %in% c("DFL", "DEM", 
-                                       "REP","IND"))
+  filter(transaction_type == "24E") 
 
 neg_cand_dollars <- hcand_dollars %>% 
-  filter(transaction_type == "24A") %>%
-  filter(!is.na(cand_party_affiliation)) %>% 
-  filter(!is.na(transaction_amt)) %>% 
-  group_by(cand_party_affiliation) %>% 
-  mutate(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(candidate_name),
-            per_cand = total_donations / num_cand) %>%
-  filter(cand_party_affiliation %in% c("DFL", "DEM", 
-                                       "REP","IND"))
+  filter(transaction_type == "24A")
 ```
 
 ```{r}
