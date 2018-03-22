@@ -70,19 +70,20 @@ cand_contributions <- contributions %>%
   group_by(cand_id , cand_name , cand_office_state , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type)
 
 h_elections <- house_elections %>% 
-  rename(cand_id = fec_id)
+  rename(cand_id = fec_id) 
 
 hcand_contributions <- cand_contributions %>%
-  full_join(h_elections , by = "cand_id")
+  full_join(h_elections , by = "cand_id") %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) 
 
 
 n_cobn <- hcand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
-  filter(transaction_type == "24A" , cand_office_state == "US")
+  filter(transaction_type == "24A")
 
 p_cobn <- hcand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type , entity_type) %>%
-  filter(transaction_type == "24E" , entity_type == "ORG")
+  filter(transaction_type == "24E" )
 
 # This is just to find how many elections there were in total: 445. Phew.
 house_elections %>%
@@ -189,5 +190,85 @@ n_money <- ggplot(n_cobn1 , aes(x = cand_party_affiliation , y = total_amt)) +
 n_money
 ```
 
-# Note that h_candcontributions has a cand_year. 
+```{r}
+# Time series of how the proportion of positive:negative contributions has changed and how this, perhaps, has changed the wins
+# Note that h_candcontributions has a cand_election_yr, which is discerte in this case.
+# Iterate over each state?
+n_cobn2 <- hcand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
+  na.omit(ge_winner) %>%
+  na.omit(cand_election_yr) %>% 
+  group_by(cand_id , transaction_type) %>%
+  filter(transaction_type == "24A" || transaction_type == "24E") %>%
+  summarize(t_t = sum(transaction_amt))
+
+  mutate(n_c = t_t / sum(t_t)) %>%
+  filter(transaction_type == "24A")
+
+
+# Just graph it first. group_by(year , transaction_amt) graph it. Separate and specify in 
+p_cobn2 <- hcand_contributions %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
+  filter(transaction_type == "24E" , !is.na(ge_winner) , !is.na(cand_election_yr)) %>%
+  group_by(cand_id , cand_election_yr , transaction_type , cand_party_affiliation) %>%
+  summarize(p_c = sum(transaction_amt))
+
+dn_cobn <- n_cobn2 %>%
+  filter(cand_party_affiliation == "DEM")
+
+rn_cobn <- n_cobn2 %>%
+  full_join(p_cobn , by = "cand_id") %>%
+  filter(cand_party_affiliation == "REP") %>%
+  mutate(p_n = p_c / n_c)
+
+
+n_cobn2 <- hcand_contributions %>%
+    filter(transaction_type == "24A" || transaction_type == "24E") %>%
+    na.omit(ge_winner) %>%
+    na.omit(cand_election_yr) %>% 
+    group_by(cand_election_yr , ge_winner , cand_party_affiliation) %>%
+    summarize(t_t = sum(transaction_amt))
+
+
+
+  
+n_p_plot <- ggplot(n_cobn2 , aes(x = cand_election_yr , y = ge_winner)) +
+  geom_bar(aes(x = cand_election_yr))
+
+n_p_plot
+```
+
+
+```{r}
+hcand_dollars <- hcand_contributions %>% 
+  filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  summarize(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(candidate_name),
+            per_cand = total_donations / num_cand) %>% 
+  #filtered by certain parties but still  
+  #doesn't look great on graph
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND"))
+```
+
+```{r}
+hcand_wins <- hcand_contributions %>% 
+  filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
+  ungroup() %>% 
+  select(cand_party_affiliation, candidate_name,
+         ge_winner) %>% 
+  group_by(candidate_name) %>% 
+  unique() %>% 
+  group_by(cand_party_affiliation) %>% 
+  summarize(total = n_distinct(candidate_name), 
+            wins = sum(ifelse(ge_winner == "W", 1, 0)),
+            prop = wins/total)
+
+hcand_wins1 <- hcand_wins %>% 
+  #similarly filtered by only certain parties
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP", "IND"))
+```
 
