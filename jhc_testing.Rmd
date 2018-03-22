@@ -92,8 +92,6 @@ house_elections %>%
   nrow()
 ```
 
-
-
 ```{r}
 n_cobn1 <- n_cobn %>% 
   group_by(cand_name) %>% 
@@ -279,5 +277,35 @@ hcand_wins1 <- hcand_wins %>%
   #similarly filtered by only certain parties
   filter(cand_party_affiliation %in% c("DFL", "DEM", 
                                        "REP", "IND"))
+```
+
+```{r}
+pos_cand_dollars <- hcand_dollars %>% 
+  filter(transaction_type == "24E") 
+
+neg_cand_dollars <- hcand_dollars %>% 
+  filter(transaction_type == "24A")
+```
+
+```{r}
+pos_contributions_plot <- ggplot(pos_cand_dollars, 
+                                  aes(x = cand_party_affiliation, y = per_cand)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Positive Contributions per Candidate",
+       x = "Party", y = "Total Positive Dollars Donated") +
+  theme_economist() +
+  theme(plot.title = element_text(size = 12),
+        legend.position = "none")
+pos_contributions_plot
+
+neg_contributions_plot <- ggplot(neg_cand_dollars, 
+                                 aes(x = cand_party_affiliation, y = per_cand)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Negative Contributions per Candidate",
+       x = "Party", y = "Total Negative Dollars Donated") +
+  theme_economist() +
+  theme(plot.title = element_text(size = 12),
+        legend.position = "none")
+neg_contributions_plot
 ```
 
