@@ -110,7 +110,7 @@ hcand_dollars <- hcand_contributions %>%
   filter(!is.na(transaction_amt)) %>% 
   group_by(cand_party_affiliation) %>% 
   summarize(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(candidate_name),
+            num_cand = n_distinct(cand_name),
             per_cand = total_donations / num_cand) %>% 
   #filtered by certain parties but still  
   #doesn't look great on graph
@@ -122,12 +122,12 @@ hcand_dollars <- hcand_contributions %>%
 hcand_wins <- hcand_contributions %>% 
   filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
   ungroup() %>% 
-  select(cand_party_affiliation, candidate_name,
+  select(cand_party_affiliation, cand_name,
          ge_winner) %>% 
-  group_by(candidate_name) %>% 
+  group_by(cand_name) %>% 
   unique() %>% 
   group_by(cand_party_affiliation) %>% 
-  summarize(total = n_distinct(candidate_name), 
+  summarize(total = n_distinct(cand_name), 
             wins = sum(ifelse(ge_winner == "W", 1, 0)),
             prop = wins/total)
 
@@ -177,18 +177,50 @@ money_plot <- ggplot(hcand_dollars,
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
 
-```{r not working}
-n_money <- ggplot(n_cobn1 , aes(x = cand_party_affiliation , y = total_amt)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Negative Contributions Spent Against Each Party" , 
-       x = "Party" , y = "Negative Contributions") +
-  theme_economist() +
-  theme(plot.title = element_text(size = 12))
+```{r}
+pos_cand_dollars <- hcand_contributions %>%
+filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  mutate(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND")) %>%
+  filter(transaction_type == "24E") 
 
-n_money
+neg_cand_dollars <- hcand_contributions %>%
+filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  mutate(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND")) %>%
+  filter(transaction_type == "24A") 
 ```
 
-```{r Time Series test}
+```{r}
+contributions_plot <- function(dataset) {
+ ggplot(dataset, aes(x = cand_party_affiliation, y = per_cand)) +
+    theme_economist() +
+    geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+    theme(plot.title = element_text(size = 12),
+          legend.position = "none")+
+    labs(x = "Party", y = "Total Dollars")
+}
+
+positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
+  labs(title = "Positive Contributions per Candidates")
+negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
+  labs(title = "Negative Contributions per Candidate")
+
+grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 2)
+
+```
+
+``{r Time Series test}
 # Time series of how the proportion of positive:negative contributions has changed and how this, perhaps, has changed the wins
 # Note that h_candcontributions has a cand_election_yr, which is discerte in this case.
 # Iterate over each state?
@@ -252,7 +284,7 @@ hcand_dollars <- hcand_contributions %>%
   filter(!is.na(transaction_amt)) %>% 
   group_by(cand_party_affiliation) %>% 
   summarize(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(candidate_name),
+            num_cand = n_distinct(cand_name),
             per_cand = total_donations / num_cand) %>% 
   #filtered by certain parties but still  
   #doesn't look great on graph
@@ -264,12 +296,12 @@ hcand_dollars <- hcand_contributions %>%
 hcand_wins <- hcand_contributions %>% 
   filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
   ungroup() %>% 
-  select(cand_party_affiliation, candidate_name,
+  select(cand_party_affiliation, cand_name,
          ge_winner) %>% 
-  group_by(candidate_name) %>% 
+  group_by(cand_name) %>% 
   unique() %>% 
   group_by(cand_party_affiliation) %>% 
-  summarize(total = n_distinct(candidate_name), 
+  summarize(total = n_distinct(cand_name), 
             wins = sum(ifelse(ge_winner == "W", 1, 0)),
             prop = wins/total)
 
@@ -277,35 +309,5 @@ hcand_wins1 <- hcand_wins %>%
   #similarly filtered by only certain parties
   filter(cand_party_affiliation %in% c("DFL", "DEM", 
                                        "REP", "IND"))
-```
-
-```{r}
-pos_cand_dollars <- hcand_dollars %>% 
-  filter(transaction_type == "24E") 
-
-neg_cand_dollars <- hcand_dollars %>% 
-  filter(transaction_type == "24A")
-```
-
-```{r}
-pos_contributions_plot <- ggplot(pos_cand_dollars, 
-                                  aes(x = cand_party_affiliation, y = per_cand)) +
-  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-  labs(title = "Positive Contributions per Candidate",
-       x = "Party", y = "Total Positive Dollars Donated") +
-  theme_economist() +
-  theme(plot.title = element_text(size = 12),
-        legend.position = "none")
-pos_contributions_plot
-
-neg_contributions_plot <- ggplot(neg_cand_dollars, 
-                                 aes(x = cand_party_affiliation, y = per_cand)) +
-  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-  labs(title = "Negative Contributions per Candidate",
-       x = "Party", y = "Total Negative Dollars Donated") +
-  theme_economist() +
-  theme(plot.title = element_text(size = 12),
-        legend.position = "none")
-neg_contributions_plot
 ```
 
