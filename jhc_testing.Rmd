@@ -113,7 +113,7 @@ hcand_dollars <- hcand_contributions %>%
   summarize(total_donations = sum(transaction_amt),
             num_cand = n_distinct(candidate_name),
             per_cand = total_donations / num_cand) %>% 
-  #filtered by certain parties but still 
+  #filtered by certain parties but still  
   #doesn't look great on graph
   filter(cand_party_affiliation %in% c("DFL", "DEM", 
                                        "REP","IND"))
