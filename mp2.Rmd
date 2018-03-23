@@ -6,6 +6,7 @@ output:
   html_document:
     code_folding: hide
 ---
+This project used the FEC data to determine the impact of two kinds of contributions, positive and negative, on the success rate of a political party within an election. Because the 24A and 24E codes were primarily available in 2012, we did not make a time series.  
 
 ```{r (Loading our Packages), message = FALSE, warning= FALSE}
 library(tidyverse)
@@ -113,6 +114,7 @@ money_plot <- ggplot(hcand_dollars,
 # Arranging percent_plot and money_plot on same plot
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
+
 
 ```{r}
 
@@ -234,35 +236,10 @@ rep_plot <- ggplot(rep_money, aes(x = transaction_type, y = total_type)) +
 grid.arrange(dem_plot, dfl_plot, ind_plot, rep_plot, ncol = 2)
 ```
 
-<<<<<<< HEAD
-These graphs allow you to see the different kind of contributions that parties got, as neither the DFL of IND had many positive contributions compared to the other parties, and you can see that both parties have a fair ammount of contributionn type 24K, which is funding for a nonaffiliated committee. 
-=======
+
+These graphs allow you to see the different kind of contributions that parties got, as neither the DFL of IND had many positive contributions compared to the other parties, and you can see that both parties have a fair amount of contribution type 24K, which is funding for a nonaffiliated committee.
+
 These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections. Also, as would be expected, Independents do not appear to be very successful.
->>>>>>> c7ba597c6aa51cad68154a035d7d01fcd9fc5155
-
-```{r}
-contributions_plot <- function(dataset) {
- ggplot(dataset, aes(x = cand_party_affiliation, y = per_cand)) +
-    scale_y_continuous(limits = c(0, 65000000000)) +
-    theme_economist() +
-    geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-    theme(plot.title = element_text(size = 9),
-          legend.position = "none")+
-    labs(x = "Party", y = "Total Dollars")
-}
-# I made a function so I could easily make the positive and negative graphs without repeating the same code. I also chose to put the same limit on the graphs so it's easier to compare the values in both graphs.
-
-positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
-  labs(title = "Positive Contributions per Candidates")
-negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
-  labs(title = "Negative Contributions per Candidate") 
-# The easiest way I found to make the title of the graph different was to add the title to the output of the function
-
-grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 2)
-# I decided to put the graphs side by side so it's easier to see the comparisons between them
-```
-
-
 
 
 
@@ -313,6 +290,7 @@ Nelection_places <- neg_cand_dollars %>%
 PofficeStateList <- as.list(Pelection_places$cand_office_state) #$ filters POfficeStateList.
 NofficeStateList <- as.list(Nelection_places$cand_office_state)
 
+# This is to find us the wins 
 dub_z <- hcand_contributions %>% 
   filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
   ungroup() %>% 
@@ -360,16 +338,20 @@ do.call("grid.arrange" , c(AllPDub_z , ncol = 7))
 # This finds us were the states where there were positive candidate contributions. 
 # Quick note: 24A and 24E were only found in 2012. 
 
+
+# Finding us positive contributions in each state as a function of that state
 pos_cand_state <- function(state_put) {
   pos_cand_dollars %>%
   filter(cand_office_state == state_put)
 }
 
+# Finding us negative contributions in each state as a function of that state
 neg_cand_state <- function(state_put) {
   neg_cand_dollars %>%
   filter(cand_office_state == state_put)
 }
 
+# Transferring it into a dataset
 PlistDataset <- lapply(PofficeStateList , FUN = pos_cand_state)
 
 NlistDataset <- lapply(NofficeStateList , FUN = neg_cand_state)
@@ -377,6 +359,7 @@ NlistDataset <- lapply(NofficeStateList , FUN = neg_cand_state)
 
 ```{r , fig.width = 30, fig.height=15}
 # So pos_cand_state is out filtered out positive cand state tbls.
+# Setting the data as a function of the states
 Pplot_z <- function(state_put) {
     ggplot(data = pos_cand_state(state_put), aes(x = cand_party_affiliation, y = per_cand)) +
     theme_economist() +
@@ -386,10 +369,12 @@ Pplot_z <- function(state_put) {
           axis.text.y = element_text(size = 6) ,
           legend.position = "none") +
     labs(x = "Party", y = "Total Dollars") + 
-    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
+    ggtitle(paste(which(c(PofficeStateList) == state_put), ". (Positive)" , state_put, sep = ""))
 }
-# Maybe I want to filer by positive states
+
+# Saving the applied graphs
 Pgraph_z <- lapply(PofficeStateList , FUN = Pplot_z)
+# Arranging them
 do.call("grid.arrange" , c(Pgraph_z , ncol = 7))
 
 Nplot_z <- function(state_put) {
@@ -401,10 +386,13 @@ Nplot_z <- function(state_put) {
           axis.text.y = element_text(size = 6) ,
           legend.position = "none") +
     labs(x = "Party", y = "Total Dollars") + 
-    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
+    ggtitle(paste(which(c(PofficeStateList) == state_put), ". (Negative)" , state_put, sep = ""))
 }
 # These below do not have the titles
 
 Ngraph_z <- lapply(NofficeStateList , FUN = Nplot_z)
 do.call("grid.arrange" , c(Ngraph_z , ncol = 7))
 ```
+We graphed the total success rate of each party in all of the states they ran in to understand if, state by state, positive or negative contributions had an impact on the wins in each state (which we also broke down). Previous graphs in this project show that Democrats spent more than Republicans while having a similar success rate in elections. Looking at the graphs from earlier in this project shows that Democrats and Republicans had similar success rates in elections, despite the higher funding from the Democratic Party. 
+
+The previous graphs also show that the Democrats generally spent more on positive contributions and the Republicans spent more on negative contributions (against the Democratic Party). By breaking down the success rates and contributions by state, the graphs illustrate the differences between the Republican and spending. Republicans generally spent positive and negative contributions, while Democrats spent more on positive contributions. From the graphs, it seems as though Democrats and Republicans both had more success in elections when they spent both negative and positive contributions. This makes it difficult to determine if contributions are the only factor in winning elections, and it demonstrates that looking at the geographical location of a state is also very important beyond just the money in a campaign.
