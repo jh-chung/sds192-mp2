@@ -83,7 +83,7 @@ hcand_wins <- hcand_contributions %>%
                                        "REP", "IND"))
 ```
 
-These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections. Also, as would be expected, Independents do not appear to be very successful.
+
 
 ```{r}
 # basic plots showing success of parties in elections,
@@ -138,6 +138,7 @@ grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 2)
 # I decided to put the graphs side by side so it's easier to see the comparisons between them
 ```
 
+
 ```{r}
 dfl_money <- hcand_dollars %>%
   filter(cand_party_affiliation == "DFL") %>%
@@ -171,6 +172,8 @@ ind_plot <- ggplot(ind_money, aes(x = transaction_type, y = total_type)) +
 
 grid.arrange(dfl_plot, ind_plot, ncol = 2)
 ```
+
+These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections. Also, as would be expected, Independents do not appear to be very successful.
 
 
 ```{r}
@@ -249,12 +252,12 @@ Ppercent_plot <- function(state_put) {
   geom_text(aes(label = total),
             position = position_dodge(width = 0.9),
             vjust = -0.25,
-            size = 6) +
+            size = 3) +
     ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
 }
 
+# I think I need a big title to explain that this is positiv eand negative. Same with the functions below
 AllPDub_z <- lapply(PofficeStateList , FUN = Ppercent_plot) 
-
 do.call("grid.arrange" , c(AllPDub_z , ncol = 7))
 ```
 
