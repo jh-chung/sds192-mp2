@@ -117,30 +117,7 @@ hcand_dollars <- hcand_contributions %>%
                                        "REP","IND"))
 ```
 
-```{r , fig.width = 30, fig.height=15}
-pos_cand_dollars <- hcand_contributions %>%
-filter(!is.na(cand_party_affiliation)) %>% 
-  filter(!is.na(transaction_amt)) %>% 
-  group_by(cand_party_affiliation) %>% 
-  mutate(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(cand_name),
-            per_cand = total_donations / num_cand) %>% 
-  filter(cand_party_affiliation %in% c("DFL", "DEM", 
-                                       "REP","IND")) %>%
-  filter(transaction_type == "24E") # %>%
-
-
-neg_cand_dollars <- hcand_contributions %>%
-filter(!is.na(cand_party_affiliation)) %>% 
-  filter(!is.na(transaction_amt)) %>% 
-  group_by(cand_party_affiliation) %>% 
-  mutate(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(cand_name),
-            per_cand = total_donations / num_cand) %>% 
-  filter(cand_party_affiliation %in% c("DFL", "DEM", 
-                                       "REP","IND")) %>%
-  filter(transaction_type == "24A") 
-
+```{r}
 hcand_wins <- hcand_contributions %>% 
   filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
   ungroup() %>% 
@@ -209,9 +186,7 @@ Ppercent_plot <- function(state_put) {
     ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
 }
 
-# I think I need a big title to explain that this is positiv eand negative. Same with the functions below
-AllPDub_z <- lapply(PofficeStateList , FUN = Ppercent_plot) 
-do.call("grid.arrange" , c(AllPDub_z , ncol = 7))
+
 ```
 
 These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections.
@@ -379,7 +354,7 @@ do.call("grid.arrange" , c(Ngraph_z , ncol = 7))
 
 
 
-lapply(NlistDataset , FUN = contributions_plot)
+lapply(NlistDatast , FUN = contributions_plot)
 
 positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
   labs(title = "Positive Contributions per Candidates")

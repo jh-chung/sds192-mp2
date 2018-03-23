@@ -19,40 +19,245 @@ load("committees.rda")
 load("contributions.rda")
 ```
 
-
 First, we thought we'd filter by contributions both for and against candidates to see if there was any interesting patterns. We looked specifically at house elections, which we had results for, to see if there was any connection between how much money candidates received and how likely they were to win.
 
 ```{r}
-# Filtering out contributions that were against a candidate
-negative_contributions <- contributions %>% 
-  filter(transaction_type == "24A")
+cand_contributions <- contributions %>%
+  full_join(candidates , by = "cand_id") %>%
+  group_by(cand_id , cand_name , cand_office_state , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type)
 
-# Filtering out contributions that were for a candidate
-positive_contributions <- contributions %>% 
+h_elections <- house_elections %>% 
+  rename(cand_id = fec_id) 
+
+hcand_contributions <- cand_contributions %>%
+  full_join(h_elections , by = "cand_id") %>%
+  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) 
+```
+
+```{r}
+hcand_dollars <- hcand_contributions %>% 
+  filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  summarize(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  #filtered by certain parties but still  
+  #doesn't look great on graph
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND"))
+```
+
+```{r}
+hcand_wins <- hcand_contributions %>% 
+  filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
+  ungroup() %>% 
+  select(cand_party_affiliation, cand_name,
+         ge_winner) %>% 
+  group_by(cand_name) %>% 
+  unique() %>% 
+  group_by(cand_party_affiliation) %>% 
+  summarize(total = n_distinct(cand_name), 
+            wins = sum(ifelse(ge_winner == "W", 1, 0)),
+            prop = wins/total) %>% 
+  #similarly filtered by only certain parties
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP", "IND"))
+
+Pelection_places <- pos_cand_dollars %>%
+  na.omit(ge_winner) %>%
+  na.omit(cand_election_yr) %>% 
+  group_by(cand_office_state) %>%
+  summarize(election_scopes = n_distinct(cand_office_state))
+
+Nelection_places <- neg_cand_dollars %>%
+  na.omit(ge_winner) %>%
+  na.omit(cand_election_yr) %>% 
+  group_by(cand_office_state) %>%
+  summarize(election_scopes = n_distinct(cand_office_state))
+# Creating our list of States
+PofficeStateList <- as.list(Pelection_places$cand_office_state)
+NofficeStateList <- as.list(Nelection_places$cand_office_state)
+
+dub_z <- hcand_contributions %>% 
+  filter(!is.na(cand_party_affiliation), !is.na(ge_winner)) %>% 
+  ungroup() %>% 
+  select(cand_party_affiliation, cand_name,
+         ge_winner , cand_office_state) %>% 
+  group_by(cand_name) %>% 
+  unique() %>% 
+  group_by(cand_party_affiliation , cand_office_state) %>% 
+  summarize(total = n_distinct(cand_name), 
+            wins = sum(ifelse(ge_winner == "W", 1, 0)),
+            prop = wins/total)
+
+
+the_winz <- function(state_put) {
+  dub_z %>%
+  filter(cand_office_state == state_put)
+}
+
+
+
+Ppercent_plot <- function(state_put) {
+  ggplot(the_winz(state_put), aes(x = cand_party_affiliation, y = prop)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
+  theme_economist() + 
+  theme(plot.title = element_text(size = 6),
+        axis.text.x =  element_text(size = 6) ,
+        axis.text.y = element_text(size = 6) ,
+        legend.position = "none") +
+  geom_text(aes(label = total),
+            position = position_dodge(width = 0.9),
+            vjust = -0.25,
+            size = 3) +
+    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
+}
+```
+
+These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections.
+
+```{r}
+# basic plots showing success of parties in elections,
+# as well as total donations received--not sure what we want to
+# do here as only democrats and republicans receive much money
+percent_plot <- ggplot(hcand_wins, aes(x = cand_party_affiliation, y = prop)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
+  theme_economist() + 
+  theme(plot.title = element_text(size = 12),
+        legend.position = "none") +
+  geom_text(aes(label = total),
+            position = position_dodge(width = 0.9),
+            vjust = -0.25,
+            size = 3)
+
+
+money_plot <- ggplot(hcand_dollars, 
+                     aes(x = cand_party_affiliation, 
+                         y = per_cand)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Donations per Candidate",
+       subtitle = "Separated by Party",
+       x = "Party", y = "Total Dollars Donated") +
+  theme_economist() +
+  theme(plot.title = element_text(size = 12),
+        legend.position = "none")
+  # geom_text(aes(label=per_cand),
+  #           position=position_dodge(width=0.9),
+  #           vjust=-0.25,
+  #           size = 2)
+  
+
+grid.arrange(percent_plot, money_plot, ncol = 2)
+```
+
+```{r}
+pos_cand_dollars <- hcand_contributions %>%
+filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  mutate(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND")) %>%
   filter(transaction_type == "24E")
 
-# Renaming a fec_id to cand_id for joining
-h_elections <- house_elections %>% 
-  rename(cand_id = fec_id)
+neg_cand_dollars <- hcand_contributions %>%
+filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  mutate(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND")) %>%
+  filter(transaction_type == "24A") 
+```
 
-# Finding candidates that were funded against
-negative_candidates <- inner_join(negative_contributions, candidates, by = "cand_id") %>% 
+```{r (Graphing for each state)}
+Pelection_places <- pos_cand_dollars %>%
+  na.omit(ge_winner) %>%
+  na.omit(cand_election_yr) %>% 
+  group_by(cand_office_state) %>%
+  summarize(election_scopes = n_distinct(cand_office_state))
 
-  right_join(h_elections , by = "cand_id") %>% # Linking the candidates to their names, not just id number
-  filter(!is.na(transaction_type)) %>% # Do not want NA transactions
-  filter(!is.na(transaction_type)) %>% 
-  group_by(cand_name, cand_party_affiliation, primary_votes,
-           runoff_votes, general_votes, ge_winner) %>% 
-  summarize(total_dollars = sum(transaction_amt)) %>% 
-  arrange(desc(total_dollars))
+Nelection_places <- neg_cand_dollars %>%
+  na.omit(ge_winner) %>%
+  na.omit(cand_election_yr) %>% 
+  group_by(cand_office_state) %>%
+  summarize(election_scopes = n_distinct(cand_office_state))
+# Creating our list of States
+PofficeStateList <- as.list(Pelection_places$cand_office_state)
+NofficeStateList <- as.list(Nelection_places$cand_office_state)
 
-positive_candidates <- inner_join(positive_contributions, candidates, by = "cand_id") %>% 
-  right_join(h_elections, by = "cand_id") %>% 
-  filter(!is.na(transaction_type)) %>% 
-  group_by(cand_name, cand_party_affiliation, primary_votes,
-  runoff_votes, general_votes, ge_winner) %>%
-  summarize(total_dollars = sum(transaction_amt)) %>% 
-  arrange(desc(total_dollars))
+pos_cand_state <- function(state_put) {
+  pos_cand_dollars %>%
+  filter(cand_office_state == state_put)
+}
+
+neg_cand_state <- function(state_put) {
+  neg_cand_dollars %>%
+  filter(cand_office_state == state_put)
+}
+
+PlistDataset <- lapply(PofficeStateList , FUN = pos_cand_state)
+
+NlistDataset <- lapply(NofficeStateList , FUN = neg_cand_state)
+```
+
+```{r , fig.width = 30, fig.height=15}
+contributions_plot <- function(dataset) {
+ ggplot(dataset, aes(x = cand_party_affiliation, y = per_cand)) +
+    theme_economist() +
+    geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+    theme(plot.title = element_text(size = 12),
+          legend.position = "none")+
+    labs(x = "Party", y = "Total Dollars")
+}
+
+
+# So pos_cand_state is out filtered out positive cand state tbls.
+Pplot_z <- function(state_put) {
+    ggplot(data = pos_cand_state(state_put), aes(x = cand_party_affiliation, y = per_cand)) +
+    theme_economist() +
+    geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+    theme(plot.title = element_text(size = 6) ,
+          axis.text.x =  element_text(size = 6) ,
+          axis.text.y = element_text(size = 6) ,
+          legend.position = "none") +
+    labs(x = "Party", y = "Total Dollars") + 
+    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
+}
+# Maybe I want to filer by positive states
+Pgraph_z <- lapply(PofficeStateList , FUN = Pplot_z)
+do.call("grid.arrange" , c(Pgraph_z , ncol = 7))
+
+Nplot_z <- function(state_put) {
+    ggplot(data = neg_cand_state(state_put), aes(x = cand_party_affiliation, y = per_cand)) +
+    theme_economist() +
+    geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+    theme(plot.title = element_text(size = 6) ,
+          axis.text.x =  element_text(size = 6) ,
+          axis.text.y = element_text(size = 6) ,
+          legend.position = "none") +
+    labs(x = "Party", y = "Total Dollars") + 
+    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
+}
+# These below do not have the titles
+
+Ngraph_z <- lapply(NofficeStateList , FUN = Nplot_z)
+do.call("grid.arrange" , c(Ngraph_z , ncol = 7))
+
+positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
+  labs(title = "Positive Contributions per Candidates")
+negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
+  labs(title = "Negative Contributions per Candidate") 
+
+grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 5)
+
 ```
 
 
