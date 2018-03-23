@@ -34,6 +34,7 @@ hcand_contributions <- cand_contributions %>%
   select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) 
 ```
 
+
 ```{r}
 hcand_dollars <- hcand_contributions %>% 
   filter(!is.na(cand_party_affiliation)) %>% 
@@ -96,61 +97,6 @@ the_winz <- function(state_put) {
   dub_z %>%
   filter(cand_office_state == state_put)
 }
-
-
-
-Ppercent_plot <- function(state_put) {
-  ggplot(the_winz(state_put), aes(x = cand_party_affiliation, y = prop)) +
-  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-  labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
-  theme_economist() + 
-  theme(plot.title = element_text(size = 6),
-        axis.text.x =  element_text(size = 6) ,
-        axis.text.y = element_text(size = 6) ,
-        legend.position = "none") +
-  geom_text(aes(label = total),
-            position = position_dodge(width = 0.9),
-            vjust = -0.25,
-            size = 3) +
-    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
-}
-```
-
-These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections.
-
-```{r}
-# basic plots showing success of parties in elections,
-# as well as total donations received--not sure what we want to
-# do here as only democrats and republicans receive much money
-percent_plot <- ggplot(hcand_wins, aes(x = cand_party_affiliation, y = prop)) +
-  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-  labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
-  theme_economist() + 
-  theme(plot.title = element_text(size = 12),
-        legend.position = "none") +
-  geom_text(aes(label = total),
-            position = position_dodge(width = 0.9),
-            vjust = -0.25,
-            size = 3)
-
-
-money_plot <- ggplot(hcand_dollars, 
-                     aes(x = cand_party_affiliation, 
-                         y = per_cand)) +
-  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-  labs(title = "Donations per Candidate",
-       subtitle = "Separated by Party",
-       x = "Party", y = "Total Dollars Donated") +
-  theme_economist() +
-  theme(plot.title = element_text(size = 12),
-        legend.position = "none")
-  # geom_text(aes(label=per_cand),
-  #           position=position_dodge(width=0.9),
-  #           vjust=-0.25,
-  #           size = 2)
-  
-
-grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
 
 ```{r}
@@ -175,6 +121,65 @@ filter(!is.na(cand_party_affiliation)) %>%
   filter(cand_party_affiliation %in% c("DFL", "DEM", 
                                        "REP","IND")) %>%
   filter(transaction_type == "24A") 
+```
+
+These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections.
+
+```{r}
+# basic plots showing success of parties in elections,
+# as well as total donations received--not sure what we want to
+# do here as only democrats and republicans receive much money
+percent_plot <- ggplot(hcand_wins, aes(x = cand_party_affiliation, y = prop)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
+  theme_economist() + 
+  theme(plot.title = element_text(size = 12),
+        legend.position = "none") +
+  geom_text(aes(label = total),
+            position = position_dodge(width = 0.9),
+            vjust = -0.25,
+            size = 3)
+
+money_plot <- ggplot(hcand_dollars, 
+                     aes(x = cand_party_affiliation, 
+                         y = per_cand)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Donations per Candidate",
+       subtitle = "Separated by Party",
+       x = "Party", y = "Total Dollars Donated") +
+  theme_economist() +
+  theme(plot.title = element_text(size = 12),
+        legend.position = "none")
+
+grid.arrange(percent_plot, money_plot, ncol = 2)
+```
+
+```{r}
+positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
+  labs(title = "Positive Contributions per Candidates")
+negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
+  labs(title = "Negative Contributions per Candidate") 
+
+grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 5)
+```
+
+
+```{r}
+Ppercent_plot <- function(state_put) {
+  ggplot(the_winz(state_put), aes(x = cand_party_affiliation, y = prop)) +
+  geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+  labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
+  theme_economist() + 
+  theme(plot.title = element_text(size = 6),
+        axis.text.x =  element_text(size = 6) ,
+        axis.text.y = element_text(size = 6) ,
+        legend.position = "none") +
+  geom_text(aes(label = total),
+            position = position_dodge(width = 0.9),
+            vjust = -0.25,
+            size = 3) +
+    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
+}
 ```
 
 ```{r (Graphing for each state)}
@@ -218,7 +223,6 @@ contributions_plot <- function(dataset) {
     labs(x = "Party", y = "Total Dollars")
 }
 
-
 # So pos_cand_state is out filtered out positive cand state tbls.
 Pplot_z <- function(state_put) {
     ggplot(data = pos_cand_state(state_put), aes(x = cand_party_affiliation, y = per_cand)) +
@@ -250,54 +254,4 @@ Nplot_z <- function(state_put) {
 
 Ngraph_z <- lapply(NofficeStateList , FUN = Nplot_z)
 do.call("grid.arrange" , c(Ngraph_z , ncol = 7))
-
-positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
-  labs(title = "Positive Contributions per Candidates")
-negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
-  labs(title = "Negative Contributions per Candidate") 
-
-grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 5)
-
 ```
-
-
-## Committees Dataset
-tres_name: Treasurer's name
-cmte_st1: Street 1 (Address)
-cmte_st2: Street 2 (Address)
-cmte_city: City or Town
-cmte_state: State
-cmte_zip: Zip Code
-cmte_dsgn: Committee Designation
-  + A = Authorized by a candidate
-  + B = Lobbyist/Registrant PAC
-  + D = Leadership PAC
-  + J = Joint fundraiser
-  + P = Principal campaign committee of a candidate
-  + U = Unauthorized
-cmte_type: Committee type
-  + https://classic.fec.gov/finance/disclosure/metadata/CommitteeTypeCodes.shtml
-cmte_party_affiliation: Party
-  + https://classic.fec.gov/finance/disclosure/metadata/DataDictionaryPartyCodeDescriptions.shtml
-cmte_filing_freq: Filing frequency
-  + A = Administratively terminated
-  + D = Debt
-  + M = Monthly filer
-  + Q = Quarterly filer
-  + T = Terminated
-  + W = Waived
-org_type: Interest category group (seems important)
-  + C = Corporation
-  + L = Labor organization
-  + M = Membership organization
-  + T = Trade association
-  + V = Cooperative
-  + W = Corporation without capital stock
-  
-## Candidates Dataset
-cand_id: Candidate identification.
-  + A 9-character alpha-numeric code assigned to a candidate by the Federal Election Commission. The candidate ID for a specific candidate remains the same across election cycles as long as the candidate is running for the same office.
-cand_name: Name of the candidate.
-cand_party_affiliation: Party affiliation
-  + https://classic.fec.gov/finance/disclosure/metadata/DataDictionaryPartyCodeDescriptions.shtml
-cand_election_yr
