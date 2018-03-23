@@ -20,9 +20,8 @@ load("committees.rda")
 load("contributions.rda")
 ```
 
-First, we thought we'd filter by contributions both for and against candidates to see if there was any interesting patterns. We looked specifically at house elections, which we had results for, to see if there was any connection between how much money candidates received and how likely they were to win.
-
 ```{r (Data Wrangling: Merging "candidates", "house_elections" , and "contributions)}
+# This was our initial step to join the contributions and candidates datasets, along with  h_elections as well. This was helpful to us for the rest of the assignment
 cand_contributions <- contributions %>%
   full_join(candidates , by = "cand_id") %>%
   group_by(cand_id , cand_name , cand_office_state , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type)
