@@ -172,8 +172,13 @@ dfl_money <- hcand_dollars %>%
   summarise(total_type = sum(transaction_amt)) %>%
   select(total_type, transaction_type) %>%
   arrange(desc(total_type))
-dfl_money
 # I wanted to see where the funding for the DFL was coming from, if not from positive contributions.
+
+dfl_plot <- ggplot(dfl_money, aes(x = transaction_type, y = total_type)) + 
+  geom_bar(stat = "identity", aes(fill = transaction_type)) + 
+  theme_economist() +
+  theme(legend.position = "none") +
+  labs(title = "DFL totals of contribution types")
 
 ind_money <- hcand_dollars %>%
   filter(cand_party_affiliation == "IND") %>%
@@ -182,8 +187,15 @@ ind_money <- hcand_dollars %>%
   summarise(total_type = sum(transaction_amt)) %>%
   select(total_type, transaction_type) %>%
   arrange(desc(total_type))
-ind_money
 # Same as the DFL, but for the IND party
+
+ind_plot <- ggplot(ind_money, aes(x = transaction_type, y = total_type)) + 
+  geom_bar(stat = "identity", aes(fill = transaction_type)) + 
+  theme_economist() +
+  theme(legend.position = "none") + 
+  labs(title = "IND totals of contribution types")
+
+grid.arrange(dfl_plot, ind_plot, ncol = 2)
 ```
 
 ```{r}
