@@ -192,7 +192,7 @@ AllPDub_z <- lapply(PofficeStateList , FUN = Ppercent_plot)
 do.call("grid.arrange" , c(AllPDub_z , ncol = 7))
 ```
 
-```{r (Graphing for each state)}
+```{r (Graphing for each state) , fig.width = 30, fig.height=15}
 Pelection_places <- pos_cand_dollars %>%
   na.omit(ge_winner) %>%
   na.omit(cand_election_yr) %>% 
@@ -244,9 +244,9 @@ Nplot_z <- function(state_put) {
     ggplot(data = neg_cand_state(state_put), aes(x = cand_party_affiliation, y = per_cand)) +
     theme_economist() +
     geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-    theme(plot.title = element_text(size = 6) ,
-          axis.text.x =  element_text(size = 6) ,
-          axis.text.y = element_text(size = 6) ,
+    theme(plot.title = element_text(size = 3) ,
+          axis.text.x =  element_text(size = 3) ,
+          axis.text.y = element_text(size = 3) ,
           legend.position = "none") +
     labs(x = "Party", y = "Total Dollars") + 
     ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
@@ -254,5 +254,5 @@ Nplot_z <- function(state_put) {
 # These below do not have the titles
 
 Ngraph_z <- lapply(NofficeStateList , FUN = Nplot_z)
-do.call("grid.arrange" , c(Ngraph_z , ncol = 7))
+do.call("grid.arrange" , c(Ngraph_z , ncol = 3))
 ```
