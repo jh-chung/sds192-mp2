@@ -187,6 +187,9 @@ Ppercent_plot <- function(state_put) {
             size = 3) +
     ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
 }
+
+AllPDub_z <- lapply(PofficeStateList , FUN = Ppercent_plot) 
+do.call("grid.arrange" , c(AllPDub_z , ncol = 7))
 ```
 
 ```{r (Graphing for each state)}
