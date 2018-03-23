@@ -6,7 +6,7 @@ output:
   html_document:
     code_folding: hide
 ---
-```{r (Loading our Packages), message=FALSE, warning=, , echo=FALSE}
+```{r (Loading our Packages), message = FALSE, warning= FALSE, echo = FALSE}
 library(tidyverse)
 library(ggthemes)
 library(gridExtra)
@@ -21,7 +21,7 @@ load("contributions.rda")
 
 First, we thought we'd filter by contributions both for and against candidates to see if there was any interesting patterns. We looked specifically at house elections, which we had results for, to see if there was any connection between how much money candidates received and how likely they were to win.
 
-```{r}
+```{r (Data Wrangling: Merging "candidates", "house_elections" , and "contributions)}
 cand_contributions <- contributions %>%
   full_join(candidates , by = "cand_id") %>%
   group_by(cand_id , cand_name , cand_office_state , cmte_id , transaction_amt , transaction_dt , transaction_pgi , transaction_type)
@@ -125,7 +125,7 @@ filter(!is.na(cand_party_affiliation)) %>%
 
 These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections.
 
-```{r}
+```{r (Total Success Rates of Parties)}
 # basic plots showing success of parties in elections,
 # as well as total donations received--not sure what we want to
 # do here as only democrats and republicans receive much money
@@ -164,7 +164,7 @@ grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 5)
 ```
 
 
-```{r}
+```{r (Applying Success Rates by Party)}
 Ppercent_plot <- function(state_put) {
   ggplot(the_winz(state_put), aes(x = cand_party_affiliation, y = prop)) +
   geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
