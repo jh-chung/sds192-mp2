@@ -185,7 +185,7 @@ dem_money <- cand_dollars2 %>%
 dem_plot <- ggplot(dem_money, aes(x = transaction_type, y = total_type)) + 
   geom_bar(stat = "identity", aes(fill = transaction_type)) + 
   theme_economist() +
-  theme(legend.position = "none", plot.title = element_text(size = 9)) +
+  theme(legend.position = "none", plot.title = element_text(size = 12)) +
   labs(title = "DEM totals of contribution types")
 
 dfl_money <- cand_dollars2 %>%
@@ -200,7 +200,7 @@ dfl_money <- cand_dollars2 %>%
 dfl_plot <- ggplot(dfl_money, aes(x = transaction_type, y = total_type)) + 
   geom_bar(stat = "identity", aes(fill = transaction_type)) + 
   theme_economist() +
-  theme(legend.position = "none", plot.title = element_text(size = 9)) +
+  theme(legend.position = "none", plot.title = element_text(size = 12)) +
   labs(title = "DFL totals of contribution types")
 
 ind_money <- cand_dollars2 %>%
@@ -214,7 +214,7 @@ ind_money <- cand_dollars2 %>%
 ind_plot <- ggplot(ind_money, aes(x = transaction_type, y = total_type)) + 
   geom_bar(stat = "identity", aes(fill = transaction_type)) + 
   theme_economist() +
-  theme(legend.position = "none", plot.title = element_text(size = 8)) + 
+  theme(legend.position = "none", plot.title = element_text(size = 12)) + 
   labs(title = "IND totals of contribution types")
 
 rep_money <- cand_dollars2 %>%
@@ -227,7 +227,7 @@ rep_money <- cand_dollars2 %>%
 rep_plot <- ggplot(rep_money, aes(x = transaction_type, y = total_type)) + 
   geom_bar(stat = "identity", aes(fill = transaction_type)) + 
   theme_economist() +
-  theme(legend.position = "none", plot.title = element_text(size = 9)) +
+  theme(legend.position = "none", plot.title = element_text(size = 12)) +
   labs(title = "REP totals of contribution types")
 
 grid.arrange(dem_plot, dfl_plot, ind_plot, rep_plot, ncol = 2)
