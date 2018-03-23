@@ -98,13 +98,16 @@ grid.arrange(percent_plot, money_plot, ncol = 2)
 pos_cand_dollars <- hcand_contributions %>%
 filter(!is.na(cand_party_affiliation)) %>% 
   filter(!is.na(transaction_amt)) %>% 
+# both party affiliation and transaction ammount wer needed in the graph, so I filtered out the entries with na values
   group_by(cand_party_affiliation) %>% 
   mutate(total_donations = sum(transaction_amt),
             num_cand = n_distinct(cand_name),
             per_cand = total_donations / num_cand) %>% 
   filter(cand_party_affiliation %in% c("DFL", "DEM", 
                                        "REP","IND")) %>%
+# I filtered out the same parties as the previous graphs, for sake of consistency
   filter(transaction_type == "24E")
+# This filter was to just get the positive contributions
 
 neg_cand_dollars <- hcand_contributions %>%
 filter(!is.na(cand_party_affiliation)) %>% 
@@ -115,25 +118,30 @@ filter(!is.na(cand_party_affiliation)) %>%
             per_cand = total_donations / num_cand) %>% 
   filter(cand_party_affiliation %in% c("DFL", "DEM", 
                                        "REP","IND")) %>%
-  filter(transaction_type == "24A") 
+  filter(transaction_type == "24A")
+# same code as above, just filtering by the negative contributions instead
 ```
 
 ```{r}
 contributions_plot <- function(dataset) {
  ggplot(dataset, aes(x = cand_party_affiliation, y = per_cand)) +
+    scale_y_continuous(limits = c(0, 65000000000)) +
     theme_economist() +
     geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-    theme(plot.title = element_text(size = 12),
+    theme(plot.title = element_text(size = 9),
           legend.position = "none")+
     labs(x = "Party", y = "Total Dollars")
 }
+# I made a function so I could easily make the positive and negative graphs without repeating the same code
 
 positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
   labs(title = "Positive Contributions per Candidates")
 negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
   labs(title = "Negative Contributions per Candidate") 
+# The easiest way I found to make the title of the graph different was to add the title to the output of the function
 
 grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 2)
+# I decided to put the graphs side by side so it's easier to see the comparisons between them
 ```
 
 ```{r}
