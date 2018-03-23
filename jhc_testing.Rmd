@@ -187,7 +187,8 @@ filter(!is.na(cand_party_affiliation)) %>%
             per_cand = total_donations / num_cand) %>% 
   filter(cand_party_affiliation %in% c("DFL", "DEM", 
                                        "REP","IND")) %>%
-  filter(transaction_type == "24E") 
+  filter(transaction_type == "24E") # %>%
+# FILTER(State)
 
 neg_cand_dollars <- hcand_contributions %>%
 filter(!is.na(cand_party_affiliation)) %>% 
@@ -201,8 +202,58 @@ filter(!is.na(cand_party_affiliation)) %>%
   filter(transaction_type == "24A") 
 ```
 
+```{r (Graphing for Each State)}
+pos_cand_dollars <- hcand_contributions %>%
+filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  mutate(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND")) %>%
+  filter(transaction_type == "24E") # %>%
+
+
+neg_cand_dollars <- hcand_contributions %>%
+filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  mutate(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND")) %>%
+  filter(transaction_type == "24A") 
+
+election_places <- pos_cand_dollars %>%
+  na.omit(ge_winner) %>%
+  na.omit(cand_election_yr) %>% 
+  group_by(cand_office_state) %>%
+  summarize(election_scopes = n_distinct(cand_office_state))
+
+# Creating our list of States
+officeStateList <- as.list(election_places$cand_office_state)
+
+
+pos_cand_state <- function(state_put) {
+  pos_cand_dollars %>%
+  filter(cand_office_state == state_put)
+}
+
+neg_cand_state <- function(state_put) {
+  neg_cand_dollars %>%
+  filter(cand_office_state == state_put)
+}
+
+PlistDataset <- lapply(officeStateList , FUN = pos_cand_state)
+
+NlistDataset <- lapply(officeStateList , FUN = neg_cand_state)
+```
+
 ```{r}
 contributions_plot <- function(dataset) {
+  #FILTER STATE, First filter and then find a list of the states
  ggplot(dataset, aes(x = cand_party_affiliation, y = per_cand)) +
     theme_economist() +
     geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
@@ -211,29 +262,18 @@ contributions_plot <- function(dataset) {
     labs(x = "Party", y = "Total Dollars")
 }
 
+ lapply(PlistDataset , FUN = contributions_plot)
+ 
+ lapply(NlistDatast , FUN = contributions_plot)
+
 positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
   labs(title = "Positive Contributions per Candidates")
 negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
-  labs(title = "Negative Contributions per Candidate")
+  labs(title = "Negative Contributions per Candidate") 
 
 grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 2)
 
 ```
-
-
-
-```{r Time Series test}
-# Time series of how the proportion of positive:negative contributions has changed and how this, perhaps, has changed the wins
-# Note that h_candcontributions has a cand_election_yr, which is discerte in this case.
-# Iterate over each state?
-cobn2 <- hcand_contributions %>%
-  select(cand_id , cand_name , cand_office_state , cand_party_affiliation , cand_office_district , cmte_id , transaction_amt , cand_election_yr , transaction_dt , transaction_pgi , transaction_type , entity_type , ge_winner) %>%
-  na.omit(ge_winner) %>%
-  na.omit(cand_election_yr) %>% 
-  group_by(cand_party_affiliation , transaction_type , transaction_amt , cand_election_yr) 
-```
-
-
 
 ```{r}
 pos_contributions_plot <- ggplot(pos_cand_dollars, 
@@ -256,3 +296,4 @@ neg_contributions_plot <- ggplot(neg_cand_dollars,
         legend.position = "none")
 neg_contributions_plot
 ```
+
