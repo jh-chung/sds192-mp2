@@ -7,10 +7,7 @@ output:
     code_folding: hide
 ---
 <<<<<<< HEAD
-```{r (Loading our Packages), message = FALSE, warning= FALSE, echo = FALSE}
-=======
-```{r (Loading our Packages), message=FALSE, warning=FALSE, echo=FALSE}
->>>>>>> 9b7a33ad8fd907ae702804a6bb3763251f22faff
+```{r (Loading our Packages), message = FALSE, warning= FALSE}
 library(tidyverse)
 library(ggthemes)
 library(gridExtra)
