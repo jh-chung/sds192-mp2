@@ -36,7 +36,7 @@ hcand_contributions <- cand_contributions %>%
 ```
 
 
-```{r}
+```{r (Data Wrangling: Finding Wins)}
 hcand_dollars <- hcand_contributions %>% 
   filter(!is.na(cand_party_affiliation)) %>% 
   filter(!is.na(transaction_amt)) %>% 
@@ -155,7 +155,7 @@ money_plot <- ggplot(hcand_dollars,
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
 
-```{r}
+```{r (Finding Total Positive/Negative Contributions by Party)}
 positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
   labs(title = "Positive Contributions per Candidates")
 negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
