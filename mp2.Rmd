@@ -132,7 +132,7 @@ contributions_plot <- function(dataset) {
           legend.position = "none")+
     labs(x = "Party", y = "Total Dollars")
 }
-# I made a function so I could easily make the positive and negative graphs without repeating the same code
+# I made a function so I could easily make the positive and negative graphs without repeating the same code. I also chose to put the same limit on the graphs so it's easier to compare the values in both graphs.
 
 positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
   labs(title = "Positive Contributions per Candidates")
@@ -142,6 +142,28 @@ negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
 
 grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 2)
 # I decided to put the graphs side by side so it's easier to see the comparisons between them
+```
+
+```{r}
+dfl_money <- hcand_dollars %>%
+  filter(cand_party_affiliation == "DFL") %>%
+  arrange(desc(transaction_amt)) %>%
+  group_by(transaction_type) %>%
+  summarise(total_type = sum(transaction_amt)) %>%
+  select(total_type, transaction_type) %>%
+  arrange(desc(total_type))
+dfl_money
+# I wanted to see where the funding for the DFL was coming from, if not from positive contributions.
+
+ind_money <- hcand_dollars %>%
+  filter(cand_party_affiliation == "IND") %>%
+  arrange(desc(transaction_amt)) %>%
+  group_by(transaction_type) %>%
+  summarise(total_type = sum(transaction_amt)) %>%
+  select(total_type, transaction_type) %>%
+  arrange(desc(total_type))
+ind_money
+# Same as the DFL, but for the IND party
 ```
 
 ```{r}
