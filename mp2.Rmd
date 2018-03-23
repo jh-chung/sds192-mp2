@@ -115,7 +115,7 @@ grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
 
 ```{r}
-<<<<<<< HEAD
+
 pos_cand_dollars <- hcand_contributions %>%
 filter(!is.na(cand_party_affiliation)) %>% 
   filter(!is.na(transaction_amt)) %>% 
@@ -177,11 +177,6 @@ filter(!is.na(cand_party_affiliation)) %>%
             per_cand = total_donations / num_cand)
 
 dem_money <- cand_dollars2 %>%
-=======
-dfl_money <- hcand_dollars %>%
-  filter(cand_party_affiliation == "DFL") %>%
-  arrange(desc(transaction_amt)) %>%
->>>>>>> c7ba597c6aa51cad68154a035d7d01fcd9fc5155
   group_by(transaction_type) %>%
   filter(cand_party_affiliation == "DEM") %>%
   summarise(total_type = sum(transaction_amt)) %>%
