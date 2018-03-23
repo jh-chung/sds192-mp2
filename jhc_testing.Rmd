@@ -387,7 +387,6 @@ negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
   labs(title = "Negative Contributions per Candidate") 
 
 grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 5)
-
 ```
 
 ```{r}
