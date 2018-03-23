@@ -114,33 +114,7 @@ money_plot <- ggplot(hcand_dollars,
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
 
-```{r}
-pos_cand_dollars <- hcand_contributions %>%
-filter(!is.na(cand_party_affiliation)) %>% 
-  filter(!is.na(transaction_amt)) %>% 
-# both party affiliation and transaction ammount wer needed in the graph, so I filtered out the entries with na values
-  group_by(cand_party_affiliation) %>% 
-  mutate(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(cand_name),
-            per_cand = total_donations / num_cand) %>% 
-  filter(cand_party_affiliation %in% c("DFL", "DEM", 
-                                       "REP","IND")) %>%
-# I filtered out the same parties as the previous graphs, for sake of consistency
-  filter(transaction_type == "24E")
-# This filter was to just get the positive contributions
 
-neg_cand_dollars <- hcand_contributions %>%
-filter(!is.na(cand_party_affiliation)) %>% 
-  filter(!is.na(transaction_amt)) %>% 
-  group_by(cand_party_affiliation) %>% 
-  mutate(total_donations = sum(transaction_amt),
-            num_cand = n_distinct(cand_name),
-            per_cand = total_donations / num_cand) %>% 
-  filter(cand_party_affiliation %in% c("DFL", "DEM", 
-                                       "REP","IND")) %>%
-  filter(transaction_type == "24A")
-# same code as above, just filtering by the negative contributions instead
-```
 
 ```{r}
 contributions_plot <- function(dataset) {
@@ -198,6 +172,35 @@ ind_plot <- ggplot(ind_money, aes(x = transaction_type, y = total_type)) +
 grid.arrange(dfl_plot, ind_plot, ncol = 2)
 ```
 
+
+```{r}
+pos_cand_dollars <- hcand_contributions %>%
+filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+# both party affiliation and transaction ammount wer needed in the graph, so I filtered out the entries with na values
+  group_by(cand_party_affiliation) %>% 
+  mutate(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND")) %>%
+# I filtered out the same parties as the previous graphs, for sake of consistency
+  filter(transaction_type == "24E")
+# This filter was to just get the positive contributions
+
+neg_cand_dollars <- hcand_contributions %>%
+filter(!is.na(cand_party_affiliation)) %>% 
+  filter(!is.na(transaction_amt)) %>% 
+  group_by(cand_party_affiliation) %>% 
+  mutate(total_donations = sum(transaction_amt),
+            num_cand = n_distinct(cand_name),
+            per_cand = total_donations / num_cand) %>% 
+  filter(cand_party_affiliation %in% c("DFL", "DEM", 
+                                       "REP","IND")) %>%
+  filter(transaction_type == "24A")
+# same code as above, just filtering by the negative contributions instead
+```
+
 ```{r}
 Pelection_places <- pos_cand_dollars %>%
   na.omit(ge_winner) %>%
@@ -239,20 +242,20 @@ Ppercent_plot <- function(state_put) {
   geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
   labs(title = "Success Rate by Party", x = "Party", y = "Proportion of Wins in Elections") +
   theme_economist() + 
-  theme(plot.title = element_text(size = 3),
-        axis.text.x =  element_text(size = 3) ,
-        axis.text.y = element_text(size = 3) ,
+  theme(plot.title = element_text(size = 6),
+        axis.text.x =  element_text(size = 6) ,
+        axis.text.y = element_text(size = 6) ,
         legend.position = "none") +
   geom_text(aes(label = total),
             position = position_dodge(width = 0.9),
             vjust = -0.25,
-            size = 3) +
+            size = 6) +
     ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
 }
 
 AllPDub_z <- lapply(PofficeStateList , FUN = Ppercent_plot) 
 
-do.call("grid.arrange" , c(AllPDub_z , ncol = 3))
+do.call("grid.arrange" , c(AllPDub_z , ncol = 7))
 ```
 
 ```{r (Graphing for each state) , fig.width = 30, fig.height=15}
