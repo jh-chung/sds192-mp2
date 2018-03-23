@@ -256,7 +256,7 @@ PlistDataset <- lapply(PofficeStateList , FUN = pos_cand_state)
 NlistDataset <- lapply(NofficeStateList , FUN = neg_cand_state)
 ```
 
-```{r}
+```{r , fig.width = 30, fig.height=15}
 contributions_plot <- function(dataset) {
  ggplot(dataset, aes(x = cand_party_affiliation, y = per_cand)) +
     theme_economist() +
@@ -266,41 +266,50 @@ contributions_plot <- function(dataset) {
     labs(x = "Party", y = "Total Dollars")
 }
 
-
-contributions_plot <- function(dataset) {
- ggplot(dataset, aes(x = cand_party_affiliation, y = per_cand)) +
-    theme_economist() +
-    geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-    theme(plot.title = element_text(size = 12),
-          legend.position = "none")+
-    labs(x = "Party", y = "Total Dollars")
-}
 
 # So pos_cand_state is out filtered out positive cand state tbls.
 Pplot_z <- function(state_put) {
     ggplot(data = pos_cand_state(state_put), aes(x = cand_party_affiliation, y = per_cand)) +
     theme_economist() +
     geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
-    theme(plot.title = element_text(size = 12),
+    theme(plot.title = element_text(size = 6) ,
+          axis.text.x =  element_text(size = 6) ,
+          axis.text.y = element_text(size = 6) ,
           legend.position = "none") +
     labs(x = "Party", y = "Total Dollars") + 
-    ggtitle(paste(which(c(PlistDataset) == cand_office_state), ". " , cand_office_state, sep = "")) 
+    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
 }
 # Maybe I want to filer by positive states
-  lapply(PlistDataset , FUN = Pplot_z)
-  
-  # THese below do not have the titles
-Pgraph_z <- lapply(PlistDataset , FUN = contributions_plot)
-do.call("grid.arrange" , c(Pgraph_z , ncol = 5))
+Pgraph_z <- lapply(PofficeStateList , FUN = Pplot_z)
+do.call("grid.arrange" , c(Pgraph_z , ncol = 7))
 
-  lapply(NlistDatast , FUN = contributions_plot)
+Nplot_z <- function(state_put) {
+    ggplot(data = neg_cand_state(state_put), aes(x = cand_party_affiliation, y = per_cand)) +
+    theme_economist() +
+    geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
+    theme(plot.title = element_text(size = 6) ,
+          axis.text.x =  element_text(size = 6) ,
+          axis.text.y = element_text(size = 6) ,
+          legend.position = "none") +
+    labs(x = "Party", y = "Total Dollars") + 
+    ggtitle(paste(which(c(PofficeStateList) == state_put), ". " , state_put, sep = ""))
+}
+# These below do not have the titles
+
+Ngraph_z <- lapply(NofficeStateList , FUN = Nplot_z)
+do.call("grid.arrange" , c(Ngraph_z , ncol = 7))
+
+
+
+
+lapply(NlistDatast , FUN = contributions_plot)
 
 positive_contributions_plot <- contributions_plot(dataset = pos_cand_dollars) + 
   labs(title = "Positive Contributions per Candidates")
 negative_contributions_plot <- contributions_plot(dataset = neg_cand_dollars) +
   labs(title = "Negative Contributions per Candidate") 
 
-grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 2)
+grid.arrange(positive_contributions_plot, negative_contributions_plot, ncol = 5)
 
 ```
 
