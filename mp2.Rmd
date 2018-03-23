@@ -114,8 +114,9 @@ money_plot <- ggplot(hcand_dollars,
 grid.arrange(percent_plot, money_plot, ncol = 2)
 ```
 
+These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections. Also, as would be expected, Independents do not appear to be very successful.
+
 ```{r}
-<<<<<<< HEAD
 pos_cand_dollars <- hcand_contributions %>%
 filter(!is.na(cand_party_affiliation)) %>% 
   filter(!is.na(transaction_amt)) %>% 
@@ -177,12 +178,6 @@ filter(!is.na(cand_party_affiliation)) %>%
             per_cand = total_donations / num_cand)
 
 dem_money <- cand_dollars2 %>%
-=======
-dfl_money <- hcand_dollars %>%
-  filter(cand_party_affiliation == "DFL") %>%
-  arrange(desc(transaction_amt)) %>%
->>>>>>> c7ba597c6aa51cad68154a035d7d01fcd9fc5155
-  group_by(transaction_type) %>%
   filter(cand_party_affiliation == "DEM") %>%
   summarise(total_type = sum(transaction_amt)) %>%
   select(total_type, transaction_type) %>%
@@ -239,11 +234,7 @@ rep_plot <- ggplot(rep_money, aes(x = transaction_type, y = total_type)) +
 grid.arrange(dem_plot, dfl_plot, ind_plot, rep_plot, ncol = 2)
 ```
 
-<<<<<<< HEAD
 These graphs allow you to see the different kind of contributions that parties got, as neither the DFL of IND had many positive contributions compared to the other parties, and you can see that both parties have a fair ammount of contributionn type 24K, which is funding for a nonaffiliated committee. 
-=======
-These plots include information from joining together the contributions, candidates, and house_elections data sets. On the left, there is information about the success rate of the different parties in elections. On top of each of the bars on the chart is the total number of candidates from the data. So while the Minnesota Democratic-Farmer-Labor Party (or DFL) has a higher success rate than Democrats or Republicans, there were also fewer candidates from this party. The graph on the right shows the amount of donations per candidate separated by party. We were trying to see if there was any correlation between the success of party candidates and the amount of donations they received. One interesting thing that can be seen is that Democrats spent comparatively more than Republicans on each candidate, but had a very similar success rate in elections. Also, as would be expected, Independents do not appear to be very successful.
->>>>>>> c7ba597c6aa51cad68154a035d7d01fcd9fc5155
 
 ```{r}
 contributions_plot <- function(dataset) {
