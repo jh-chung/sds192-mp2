@@ -189,7 +189,7 @@ filter(!is.na(cand_party_affiliation)) %>%
                                        "REP","IND")) %>%
 # I filtered out the same parties as the previous graphs, for sake of consistency
   filter(transaction_type == "24E")
-# This filter was to just get the positive contributions
+# This filter was to just get the positive contributions from the parties.
 
 neg_cand_dollars <- hcand_contributions %>%
 filter(!is.na(cand_party_affiliation)) %>% 
@@ -205,19 +205,22 @@ filter(!is.na(cand_party_affiliation)) %>%
 ```
 
 ```{r}
+# Here, we are trying to find the states in which people ran for office w/ positive contributions
 Pelection_places <- pos_cand_dollars %>%
   na.omit(ge_winner) %>%
   na.omit(cand_election_yr) %>% 
   group_by(cand_office_state) %>%
   summarize(election_scopes = n_distinct(cand_office_state))
 
+# Here, we are trying to find the states in which people ran for office w/ negative contributions
 Nelection_places <- neg_cand_dollars %>%
   na.omit(ge_winner) %>%
   na.omit(cand_election_yr) %>% 
   group_by(cand_office_state) %>%
   summarize(election_scopes = n_distinct(cand_office_state))
+
 # Creating our list of States
-PofficeStateList <- as.list(Pelection_places$cand_office_state)
+PofficeStateList <- as.list(Pelection_places$cand_office_state) #$ filters POfficeStateList.
 NofficeStateList <- as.list(Nelection_places$cand_office_state)
 
 dub_z <- hcand_contributions %>% 
@@ -240,7 +243,8 @@ the_winz <- function(state_put) {
 ```
 
 
-```{r (Applying Success Rates by Party in Every State)}
+```{r (Applying Success Rates by Party in Every State), fig.width = 30, fig.height=15}
+# Finding the Success Rate for Each Party in every State, function to find it
 Ppercent_plot <- function(state_put) {
   ggplot(the_winz(state_put), aes(x = cand_party_affiliation, y = prop)) +
   geom_bar(stat = "identity", aes(fill = cand_party_affiliation)) +
