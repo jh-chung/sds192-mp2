@@ -6,19 +6,19 @@ output:
   html_document:
     code_folding: hide
 ---
+```{r (Loading our Packages), message=FALSE, warning=, , echo=FALSE}
+library(tidyverse)
+library(ggthemes)
+library(gridExtra)
+```
 
-```{r, include=FALSE}
+```{r (Loading the Dataset), , include=FALSE}
 load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
 ```
 
-```{r, include=FALSE}
-library(tidyverse)
-library(gridExtra)
-library(dplyr)
-```
 
 First, we thought we'd filter by contributions both for and against candidates to see if there was any interesting patterns. We looked specifically at house elections, which we had results for, to see if there was any connection between how much money candidates received and how likely they were to win.
 
